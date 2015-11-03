@@ -92,4 +92,21 @@ class User extends Model implements AuthenticatableContract,
     {
         return $this->hasMany('App\Models\OpenBattle', 'rapper2_id');
     }
+
+    /**
+     * Scope a query to only include rappers
+     */
+    public function scopeRapper($query)
+    {
+        return $query->where('rapper', 1);
+    }
+
+    /**
+     * Scope a query to only contain the top $num rappers by the rating
+     */
+    public function scopeRatedBetween($query, $min, $max)
+    {
+        return $query->where('rating', '>=', $min)->where('rating', '<=', $max);
+    }
+
 }

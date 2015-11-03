@@ -42,5 +42,17 @@ class Battle extends Model
     public function votes(){
         return $this->hasMany('App\Models\Votes');
     }
-    
+
+    public function scopeTrending($query)
+    {
+        // TODO: implement this
+        //return $query->
+    }
+
+    public function scopeOpenVoting($query)
+    {
+        // TODO: implement this
+        //return $query->;
+    }
+
 }
