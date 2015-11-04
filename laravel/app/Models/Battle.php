@@ -43,12 +43,18 @@ class Battle extends Model
         return $this->hasMany('App\Models\Votes');
     }
 
+    /**
+     * Scope a query to only contain trending battles
+     */
     public function scopeTrending($query)
     {
         // TODO: implement this
         //return $query->
     }
 
+    /**
+     * Scope a query to only contain battles that are open for voting
+     */
     public function scopeOpenVoting($query)
     {
         // TODO: implement this

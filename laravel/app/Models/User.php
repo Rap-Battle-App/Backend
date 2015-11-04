@@ -102,7 +102,7 @@ class User extends Model implements AuthenticatableContract,
     }
 
     /**
-     * Scope a query to only contain the top $num rappers by the rating
+     * Scope a query to only contain ratings between $min and $max
      */
     public function scopeRatedBetween($query, $min, $max)
     {
