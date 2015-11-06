@@ -55,7 +55,7 @@ return [
         'mysql' => [
             'driver'    => 'mysql',
             'host'      => env('DB_HOST', 'localhost'),
-            'database'  => env('DB_DATABASE', 'rap-battle'),
+            'database'  => env('DB_DATABASE', 'rap_battle'),
             'username'  => env('DB_USERNAME', 'admin'),
             'password'  => env('DB_PASSWORD', ''),
             'charset'   => 'utf8',
