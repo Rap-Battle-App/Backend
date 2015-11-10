@@ -17,18 +17,11 @@ class User extends Model implements AuthenticatableContract,
     use Authenticatable, Authorizable, CanResetPassword;
 
     /**
-     * The database table used by the model.
-     *
-     * @var string
-     */
-    protected $table = 'users';
-
-    /**
      * The attributes that are mass assignable.
-     * TODO: add other fields, if necessary
      * @var array
      */
-    protected $fillable = ['name', 'email', 'password', 'city', 'about_me'];
+    protected $fillable = ['name', 'email', 'password', 'picture', 'city', 'about_me',
+                            'rapper', 'notifications', 'wins', 'rating'];
 
     /**
      * The attributes excluded from the model's JSON form.
@@ -42,7 +35,7 @@ class User extends Model implements AuthenticatableContract,
      */
     public function votes()
     {
-        returns $this->hasMany('App\Models\Vote');
+        return $this->hasMany('App\Models\Vote');
     }
 
     /**

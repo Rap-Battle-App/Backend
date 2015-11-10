@@ -7,13 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class BattleRequest extends Model
 {
     /**
-     * The database table used by the model.
-     * implied by class name
-     * @var string
-     */
-    protected $table = 'battle_requests';
-
-    /**
      * The attributes that are mass assignable.
      *
      * @var array

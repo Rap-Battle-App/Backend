@@ -7,18 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class Battle extends Model
 {
     /**
-     * The database table used by the model.
-     * implied by class name
-     * @var string
-     */
-    /* protected $table = 'battles'; */
-
-    /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
-    protected $fillable = ['rapper1_id', 'rapper2_id', 'video'];
+    protected $fillable = ['rapper1_id', 'rapper2_id', 'video', 'votes_rapper1', 'votes_rapper2'];
 
     /**
      * Get the user rapper 1
