@@ -33,7 +33,7 @@ class Battle extends Model
      * Get votes
      */
     public function votes(){
-        return $this->hasMany('App\Models\Votes');
+        return $this->hasMany('App\Models\Vote');
     }
 
     /**
