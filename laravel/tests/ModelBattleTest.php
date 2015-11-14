@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Carbon\Carbon;
 
 use App\Models\Battle;
 
@@ -69,6 +70,32 @@ class ModelBattleTest extends TestCase
      */
     public function testScopeOpenVoting()
     {
-        $this->markTestIncomplete('This test has not been implemented yet');
+        $user1 = factory(App\Models\User::class)->create();
+        $user2 = factory(App\Models\User::class)->create();
+
+        $votingperiod = Config::get('rap-battle.votingperiod', 24);
+        // battles older than this date are closed:
+        $timeoldest = new Carbon();
+//        $timeoldest->subHours($votingperiod + 1);
+        $timeoldest->subHours(36);
+
+        // create two battles
+        $battle1 = new Battle;
+        $battle1->rapper1_id = $user1->id;
+        $battle1->rapper2_id = $user2->id;
+        $battle1->save();
+        
+        $battle2 = new Battle;
+        $battle2->rapper1_id = $user1->id;
+        $battle2->rapper2_id = $user2->id;
+        $battle2->created_at = $timeoldest->toDateTimeString();
+        $battle2->save();
+
+        // get battles from database
+        $openBattles = Battle::openVoting()->get()->values()->keyBy('id');
+
+        // check
+        $this->assertNotNull($openBattles->get($battle1->id));
+        $this->assertNull($openBattles->get($battle2->id));
     }
 }

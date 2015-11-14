@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Battle extends Model
 {
@@ -50,8 +51,13 @@ class Battle extends Model
      */
     public function scopeOpenVoting($query)
     {
-        // TODO: implement this
-        //return $query->;
+        $votingperiod = config('rap-battle.votingperiod', 24);
+
+        // battles older than this date are closed:
+        $timeoldest = new Carbon();
+        $timeoldest->subHours($votingperiod);
+
+        return $query->where('created_at', '>=', $timeoldest->toDateTimeString());
     }
 
 }
