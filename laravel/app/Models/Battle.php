@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use DB;
 use Carbon\Carbon;
 
 class Battle extends Model
@@ -42,8 +43,8 @@ class Battle extends Model
      */
     public function scopeTrending($query)
     {
-        // TODO: implement this
-        //return $query->
+        $trendingcnt = config('rap-battle.trendingcnt', 5);
+        return $query->orderBy(DB::raw('votes_rapper1 + votes_rapper2'), 'desc')->take($trendingcnt);
     }
 
     /**

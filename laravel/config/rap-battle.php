@@ -14,4 +14,16 @@ return [
 
     'votingperiod' => 24,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Trending Count
+    |--------------------------------------------------------------------------
+    |
+    | This sets the amount of trending battles that are returned
+    | default: 5
+    |
+    */
+
+    'trendingcnt' => 5,
+
 ];

@@ -62,7 +62,24 @@ class ModelBattleTest extends TestCase
      */
     public function testScopeTrending()
     {
-        $this->markTestIncomplete('This test has not been implemented yet');
+        // create users
+        $user1 = factory(App\Models\User::class)->create();
+        $user2 = factory(App\Models\User::class)->create();
+
+        // create battles
+        for($i = 0; $i < 10; ++$i){
+            $battle = new Battle;
+            $battle->rapper1_id = $user1->id;
+            $battle->rapper2_id = $user2->id;
+            $battle->votes_rapper1 = rand(0, 2 * $i);
+            $battle->votes_rapper2 = rand(0, 2 * $i);
+            $battle->save();
+        }
+
+        //check trending battle count
+        $trendingcnt = config('rap-battle.trendingcnt', 5);
+        $trending = Battle::trending()->get();
+        $this->assertEquals($trendingcnt, $trending->count());
     }
 
     /**
@@ -76,8 +93,7 @@ class ModelBattleTest extends TestCase
         $votingperiod = Config::get('rap-battle.votingperiod', 24);
         // battles older than this date are closed:
         $timeoldest = new Carbon();
-//        $timeoldest->subHours($votingperiod + 1);
-        $timeoldest->subHours(36);
+        $timeoldest->subHours($votingperiod + 1);
 
         // create two battles
         $battle1 = new Battle;
