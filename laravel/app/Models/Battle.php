@@ -54,11 +54,25 @@ class Battle extends Model
     {
         $votingperiod = config('rap-battle.votingperiod', 24);
 
-        // battles older than this date are closed:
+        // battles before this date are closed:
         $timeoldest = new Carbon();
         $timeoldest->subHours($votingperiod);
 
         return $query->where('created_at', '>=', $timeoldest->toDateTimeString());
+    }
+
+    /**
+     * Scope a query to only contain battles that are closed for voting
+     */
+    public function scopeCompleted($query)
+    {
+        $votingperiod = config('rap-battle.votingperiod', 24);
+
+        // battles before this date are closed:
+        $timeoldest = new Carbon();
+        $timeoldest->subHours($votingperiod);
+
+        return $query->where('created_at', '<', $timeoldest->toDateTimeString());
     }
 
 }

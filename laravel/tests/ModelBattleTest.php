@@ -83,7 +83,7 @@ class ModelBattleTest extends TestCase
     }
 
     /**
-     * Test for scopeOpenVoting
+     * Test for scopeOpenVoting and scopeCompleted
      */
     public function testScopeOpenVoting()
     {
@@ -107,11 +107,18 @@ class ModelBattleTest extends TestCase
         $battle2->created_at = $timeoldest->toDateTimeString();
         $battle2->save();
 
+        // test scopeOpenVoting
         // get battles from database
         $openBattles = Battle::openVoting()->get()->values()->keyBy('id');
 
         // check
         $this->assertNotNull($openBattles->get($battle1->id));
         $this->assertNull($openBattles->get($battle2->id));
+
+        // test scopeCompleted
+        // get battles from database
+        $completedBattles = Battle::completed()->get()->values()->keyBy('id');
+        $this->assertNull($completedBattles->get($battle1->id));
+        $this->assertNotNull($completedBattles->get($battle2->id));
     }
 }
