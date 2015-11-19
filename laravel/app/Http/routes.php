@@ -24,6 +24,11 @@ Route::group(['prefix' => 'auth'], function () {
     //Route::get('id', 'Auth\AuthController@getId');
 });
 
+Route::group(['prefix' => 'password-recovery', 'middleware' => 'guest'], function() {
+    Route::post('email', 'Auth\PasswordController@postEmail');
+    Route::post('reset', 'Auth\PasswordController@postReset');
+});
+
 /**
  * Routes protected from unauthorized access by auth middleware
  */
