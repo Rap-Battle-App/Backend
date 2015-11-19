@@ -81,6 +81,6 @@ Route::group(['middleware' => 'auth'], function() {
     /**
      * Data Access Routes
      */
-    //Route::get('picture/{id}', 'DataAccessController@getPicture');
-    //Route::get('video/{id}', 'DataAccessController@getVideo');
+    //Route::get('picture/{id}', ['as' => 'data.picture', 'uses' => 'DataAccessController@getPicture']);
+    //Route::get('video/{id}', ['as' => 'data.video', 'uses' => 'DataAccessController@getVideo']);
 });
