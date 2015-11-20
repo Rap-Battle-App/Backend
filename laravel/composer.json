@@ -8,7 +8,7 @@
         "php": ">=5.5.9",
         "laravel/framework": "5.1.*",
         "davibennun/laravel-push-notification": "dev-laravel5",
-        "php-ffmpeg/php-ffmpeg": "~0.5"
+        "php-ffmpeg/php-ffmpeg": "dev-concat"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
@@ -16,6 +16,12 @@
         "phpunit/phpunit": "~4.0",
         "phpspec/phpspec": "~2.1"
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/Rap-Battle-App/PHP-FFMpeg"
+        }
+    ],
     "autoload": {
         "classmap": [
             "database"
