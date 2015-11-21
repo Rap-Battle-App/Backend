@@ -56,6 +56,13 @@ class ConvertVideo
             // set video format
             $format = new FFMpeg\Format\Video\X264('libmp3lame');
 
+            $videobitrate = config('rap-battle.video_bitrate', $format->getKiloBitrate());
+            $format->setKiloBitrate($videobitrate);
+            $audiobitrate = config('rap-battle.audio_bitrate', $format->getAudioKiloBitrate());
+            $format->setAudioKiloBitrate($audiobitrate);
+            $audiocodec = config('rap-battle.audio_codec', $format->getAudioCodec());
+            $format->setAudioCodec($audiocodec);
+
             // save video
             $videos[0]->save($format, $event->outfile);
         }
