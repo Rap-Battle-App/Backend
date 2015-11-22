@@ -4,6 +4,10 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ResetsPasswords;
+use Illuminate\Http\Request;
+use Illuminate\Mail\Message;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Http\JsonResponse;
 
 class PasswordController extends Controller
 {
@@ -20,7 +24,23 @@ class PasswordController extends Controller
 
     use ResetsPasswords;
 
-    $this->subject = '16bars Battle Rap App Passwort Wiederherstellung';
+    private $subject = '16bars Battle Rap App Passwort Wiederherstellung';
+
+    /**
+     * Send a reset link to the given user.
+     * Overwritten function of ResetsPassword trait.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function postEmail(Request $request)
+    {
+        $this->validate($request, ['email' => 'required|email']);
+
+        $response = Password::sendResetLink($request->only('email'), function (Message $message) {
+            $message->subject($this->getEmailSubject());
+        });
+    }
 
     /**
      * Reset the given user's password.
@@ -40,6 +60,8 @@ class PasswordController extends Controller
         $credentials = $request->only(
             'email', 'password', 'token'
         );
+        // confirmation value is used by Password::reset
+        $credentials['password_confirmation'] = $credentials['password'];
 
         $response = Password::reset($credentials, function ($user, $password) {
             $this->resetPassword($user, $password);
@@ -47,7 +69,9 @@ class PasswordController extends Controller
 
         switch ($response) {
             case Password::INVALID_USER:
-                return redirect()->back()->withErrors(['email' => trans($response)]);
+                return new JsonResponse(['email' => [trans($response)]], 422);
+            case Password::INVALID_TOKEN:
+                return new JsonResponse(['token' => [trans($response)]], 422);
         }
     }
 }
