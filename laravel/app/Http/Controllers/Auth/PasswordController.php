@@ -20,13 +20,34 @@ class PasswordController extends Controller
 
     use ResetsPasswords;
 
+    $this->subject = '16bars Battle Rap App Passwort Wiederherstellung';
+
     /**
-     * Create a new password controller instance.
+     * Reset the given user's password.
+     * Overwritten function of ResetsPassword trait.
      *
-     * @return void
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
      */
-    public function __construct()
+    public function postReset(Request $request)
     {
-        $this->middleware('guest');
+        $this->validate($request, [
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|min:6',
+        ]);
+
+        $credentials = $request->only(
+            'email', 'password', 'token'
+        );
+
+        $response = Password::reset($credentials, function ($user, $password) {
+            $this->resetPassword($user, $password);
+        });
+
+        switch ($response) {
+            case Password::INVALID_USER:
+                return redirect()->back()->withErrors(['email' => trans($response)]);
+        }
     }
 }
