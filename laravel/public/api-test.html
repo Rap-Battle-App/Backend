@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf8"/>
+        <title>API Test v0.1</title>
+        <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script type="text/javascript">
+            var xhr;
+            var _jqXHR = $.ajaxSettings.xhr;
+            $.ajaxSettings.xhr = function() {
+                xhr = _jqXHR();
+                return xhr;
+            }
+            $(document).ajaxStart(function() {
+                $('#error').hide();
+                $('#redirect').hide();
+                $('#response').hide();
+            });
+            $(document).ajaxSuccess(function(e, jqXHR, settings, data) {
+                $('#response #request-info #method').html(settings.type);
+                $('#response #request-info #url').html(settings.url);
+                $('#response #status #number').html(jqXHR.status);
+                $('#response #status #text').html(jqXHR.statusText);
+                $('#response #content #text').html(JSON.stringify(data) || "no content");
+                $('#response').show();
+            });
+            $(document).ajaxError(function(e, jqXHR, settings, error) {
+                $('#response #request-info #method').html(settings.type);
+                $('#response #request-info #url').html(settings.url);
+                if(settings.url != xhr.responseURL) {
+                    $('#redirect #redirect-url').html(xhr.responseURL);
+                    $('#redirect').show();
+                }
+                $('#response #status #number').html(jqXHR.status);
+                $('#response #status #text').html(jqXHR.statusText);
+                $('#response #content #text').html(jqXHR.responseText || "no content");
+                $('#response').show();
+            });
+            $(document).ready(function() {
+                $('#error').hide();
+                $('#response').hide();
+                $('#submit').click(function(e) {
+                    e.preventDefault();
+                    try {
+                        if($('#request-form #method').val() == 'get') {
+                            $.get('http://localhost/' + $('#request-form #route').val(), JSON.parse('{' + $('#request-form #parameters').val() + '}'));
+                        } else {
+                            $.post('http://localhost/' + $('#request-form #route').val(), JSON.parse('{' + $('#request-form #parameters').val() + '}'));
+                        }
+                    } catch(e) {
+                        $('#error #message').html(e.message);
+                        $('#response').hide();
+                        $('#error').show();
+                    }
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <form id="request-form">
+            <select id="method">
+                <option value="get">GET</option>
+                <option value="post">POST</option>
+            </select>
+            <label>to http://localhost/</label><input id="route" type="text" placeholder="your/route/here" \><br/>
+            <label>Parameters (JSON): {</label><br/><textarea id="parameters" rows="10" cols="50" placeholder="&#34;example&#34;: &#34;value&#34;, &#34;integer_value&#34;: 1"></textarea><br/><label>}</label><br/>
+            <button id="submit" type="submit">Send</button>
+        </form>
+        <div id="error">Error: <span id="message"></span></div>
+        <div id="response">
+            <hr/>
+            <div id="request-info">
+                <span id="method"></span> Request to <span id="url"></span>
+                <p id="redirect">-> Redirected to: <span id="redirect-url"></span></p>
+            </div>
+            <div id="status">
+                Status:
+                <span id="number"></span>
+                <span id="text"></span>
+            </div>
+            <div id="content">
+                Content:
+                <span id="text"></span>
+            </div>
+        </div>
+    </body>
+</html>
