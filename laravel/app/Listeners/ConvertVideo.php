@@ -10,7 +10,14 @@ use App\Events\VideoWasUploaded;
 use FFMpeg;
 use FFMpeg\Media\Video;
 use FFMpeg\Filters\Video\ConcatFilter;
+use FFMpeg\Filters\Video\ResizeFilter;
+use FFMpeg\Coordinate\Dimension;
 
+/**
+ * This listener will be called to convert single videos or to concatenate
+ * multiple videos. Single videos will be resized if necessary, multiple
+ * videos have to be the same size.
+ */
 class ConvertVideo
 {
     /**
@@ -41,9 +48,19 @@ class ConvertVideo
                 $videos[] = $ffmpeg->open($file);
             }
 
-            // if multiple input files: create concatenation filter
-            if(count($videos) > 1){ // convert single file
-                // create filter
+            /**
+             * The concatenation filter needs all videos to be the same size
+             * therefore the resize filter will be added if only a single video
+             * will be converted, otherwise the concatenation filter will be used
+             */
+            if(count($videos) == 1){ // only one input file
+                // add resize filter
+                $width = config('rap-battle.video_width', 1920);
+                $height = config('rap-battle.video_height', 1080);
+                $resizefilter = new ResizeFilter(new Dimension($width, $height), ResizeFilter::RESIZEMODE_INSET);
+                $videos[0]->addFilter($resizefilter);
+            } else { // multiple input files: create concatenation filter
+                // create concat filter
                 $concatfilter = new ConcatFilter;
                 $videos[0]->addFilter($concatfilter);
 
