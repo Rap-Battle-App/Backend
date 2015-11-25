@@ -48,18 +48,41 @@ class AuthController extends Controller
         ]);
     }
 
+	
+	protected function postLogin(array $data)
+    {
+        Auth::login($data->user);
+    }
+	
+	
     /**
      * Create a new user instance after a valid registration.
      *
      * @param  array  $data
-     * @return User
-     */
-    protected function create(array $data)
+     * @return UserId
+	*/	
+	
+	protected function postRegister(array $data)
     {
-        return User::create([
-            'name' => $data['name'],
+        $user = User::create([
+            'username' => $data['name'],
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
         ]);
+		
+		return $user->$id;
     }
+	
+	
+	protected function getLogout()
+    {
+        Auth::logout(Auth::user()->id;);
+    }
+	
+	protected function getId()
+    {
+        return Auth::user()->id;
+    }
+	
+	
 }
