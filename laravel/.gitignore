@@ -3,3 +3,5 @@
 Homestead.yaml
 Homestead.json
 .env
+/tests/Video/*.mp4
+/tests/Video/*.3gp
