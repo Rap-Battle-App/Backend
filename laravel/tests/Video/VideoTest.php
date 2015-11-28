@@ -5,8 +5,6 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 use FFMpeg\Filters\Video\ConcatFilter;
-use App\Events;
-
 
 /**
  * Unit tests for the video subsystem

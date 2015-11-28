@@ -18,7 +18,7 @@ use FFMpeg\Coordinate\Dimension;
  * multiple videos. Single videos will be resized if necessary, multiple
  * videos have to be the same size.
  */
-class ConvertVideo
+class ConvertVideo implements ShouldQueue
 {
     /**
      * Create the event listener.
