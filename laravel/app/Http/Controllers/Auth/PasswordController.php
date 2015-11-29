@@ -24,7 +24,7 @@ class PasswordController extends Controller
 
     use ResetsPasswords;
 
-    private $subject = '16bars Battle Rap App Passwort Wiederherstellung';
+    private $subject = trans('password-recovery.email-title');
 
     /**
      * Send a reset link to the given user.
