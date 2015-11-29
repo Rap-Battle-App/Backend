@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers
 
 use App\User;
 use Validator;
@@ -48,20 +48,20 @@ class AuthController extends Controller
         ]);
     }
 
-	
+
 	protected function postLogin(array $data)
     {
         Auth::login($data->user);
     }
-	
-	
+
+
     /**
      * Create a new user instance after a valid registration.
      *
      * @param  array  $data
      * @return UserId
-	*/	
-	
+	*/
+
 	protected function postRegister(array $data)
     {
         $user = User::create([
@@ -69,20 +69,20 @@ class AuthController extends Controller
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
         ]);
-		
+
 		return $user->$id;
     }
-	
-	
+
+
 	protected function getLogout()
     {
         Auth::logout(Auth::user()->id;);
     }
-	
+
 	protected function getId()
     {
         return Auth::user()->id;
     }
-	
-	
+
+
 }

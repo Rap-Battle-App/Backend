@@ -15,15 +15,15 @@
  * Authentication Routes
  */
 Route::group(['prefix' => 'auth'], function () {
-    Route::post('login', 'Auth\AuthController@postLogin');
-    Route::post('register', 'Auth\AuthController@postRegister');
-    Route::get('logout', 'Auth\AuthController@getLogout');
-    Route::get('id', 'Auth\AuthController@getId');
+    Route::post('login', 'AuthController@postLogin');
+    Route::post('register', 'AuthController@postRegister');
+    Route::get('logout', 'AuthController@getLogout');
+    Route::get('id', 'AuthController@getId');
 });
 
 Route::group(['prefix' => 'password-recovery', 'middleware' => 'guest'], function() {
-    Route::post('email', 'Auth\PasswordController@postEmail');
-    Route::post('reset', 'Auth\PasswordController@postReset');
+    Route::post('email', 'PasswordController@postEmail');
+    Route::post('reset', 'PasswordController@postReset');
 });
 
 /**
