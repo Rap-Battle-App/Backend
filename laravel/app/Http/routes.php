@@ -11,9 +11,6 @@
 |
 */
 
-// TODO: add controller namespaces if placed in necessary
-// TODO: uncomment routes when controller implemented
-
 /**
  * Authentication Routes
  */
@@ -21,7 +18,7 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('login', 'Auth\AuthController@postLogin');
     Route::post('register', 'Auth\AuthController@postRegister');
     Route::get('logout', 'Auth\AuthController@getLogout');
-    //Route::get('id', 'Auth\AuthController@getId');
+    Route::get('id', 'Auth\AuthController@getId');
 });
 
 Route::group(['prefix' => 'password-recovery', 'middleware' => 'guest'], function() {
@@ -36,51 +33,51 @@ Route::group(['middleware' => 'auth'], function() {
     /**
      * App-User Routes
      */
-    //Route::post('profile', 'UserController@postProfileInformation');
-    //Route::post('profile/picture', 'UserController@postProfilePicture');
+    Route::post('profile', 'UserController@postProfileInformation');
+    Route::post('profile/picture', 'UserController@postProfilePicture');
     Route::group(['prefix' => 'account'], function() {
-        //Route::get('settings', 'UserController@getSettings');
-        //Route::post('settings', 'UserController@postSettings');
-        //Route::post('username', 'UserController@postUsername');
-        //Route::post('password', 'UserController@postPassword');
+        Route::get('settings', 'UserController@getSettings');
+        Route::post('settings', 'UserController@postSettings');
+        Route::post('username', 'UserController@postUsername');
+        Route::post('password', 'UserController@postPassword');
     });
     /**
      * User Profile Routes
      */
-    //Route::get('user/{id}', 'UserController@getProfile');
+    Route::get('user/{id}', 'UserController@getProfile');
     /**
      * Battle List Routes
      */
     Route::group(['prefix' => 'battles'], function() {
-        //Route::get('trending', 'BattleController@getTrending');
-        //Route::get('open-voting', 'BattleController@getOpenVoting');
-        //Route::get('completed', 'BattleController@getCompleted');
-        //Route::get('open', 'BattleController@getOpen');
+        Route::get('trending', 'BattleController@getTrending');
+        Route::get('open-voting', 'BattleController@getOpenVoting');
+        Route::get('completed', 'BattleController@getCompleted');
+        Route::get('open', 'BattleController@getOpen');
     });
     /**
      * Battle Routes
      */
-    //Route::get('battle/{id}', 'BattleController@getBattle');
-    //Route::post('battle/{id}/vote', 'BattleController@postVote');
+    Route::get('battle/{id}', 'BattleController@getBattle');
+    Route::post('battle/{id}/vote', 'BattleController@postVote');
     /**
      * Open Battle Routes
      */
-    //Route::get('open-battle/{id}', 'OpenBattleController@getBattle');
-    //Route::post('open-battle/{id}/round', 'OpenBattleController@postRound');
+    Route::get('open-battle/{id}', 'OpenBattleController@getBattle');
+    Route::post('open-battle/{id}/round', 'OpenBattleController@postRound');
     /**
      * Battle Request Routes
      */
-    //Route::get('requests', 'BattleRequestController@getRequests');
-    //Route::post('request', 'BattleRequestController@postRequest');
-    //Route::post('request/{id}', 'BattleRequestController@postAnswer');
-    //Route::get('request/random', 'BattleRequestController@getRandomOpponent');
+    Route::get('requests', 'BattleRequestController@getRequests');
+    Route::post('request', 'BattleRequestController@postRequest');
+    Route::post('request/{id}', 'BattleRequestController@postAnswer');
+    Route::get('request/random', 'BattleRequestController@getRandomOpponent');
     /**
      * Search Routes
      */
-    //Route::post('search', 'SearchController@postSearch');
+    Route::post('search', 'SearchController@postSearch');
     /**
      * Data Access Routes
      */
-    //Route::get('picture/{id}', ['as' => 'data.picture', 'uses' => 'DataAccessController@getPicture']);
-    //Route::get('video/{id}', ['as' => 'data.video', 'uses' => 'DataAccessController@getVideo']);
+    Route::get('picture/{id}', ['as' => 'data.picture', 'uses' => 'DataAccessController@getPicture']);
+    Route::get('video/{id}', ['as' => 'data.video', 'uses' => 'DataAccessController@getVideo']);
 });
