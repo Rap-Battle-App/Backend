@@ -45,9 +45,5 @@ class ModelOpenBattleTest extends TestCase
         // can rappers be retrieved?
         $this->assertNotNull($openBattle->rapper1()->get()->values()->keyBy('id')->get($user1->id));
         $this->assertNotNull($openBattle->rapper2()->get()->values()->keyBy('id')->get($user2->id));
-
-        // can users retrieve their open battles?
-        $this->assertNotNull($user1->openBattlesRapper1()->get()->values()->keyBy('id')->get($openBattle->id));
-        $this->assertNotNull($user2->openBattlesRapper2()->get()->values()->keyBy('id')->get($openBattle->id));
     }
 }

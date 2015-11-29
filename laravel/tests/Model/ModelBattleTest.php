@@ -50,10 +50,6 @@ class ModelBattleTest extends TestCase
         // can rappers be retrieved?
         $this->assertNotNull($battle->rapper1()->get()->values()->keyBy('id')->get($user1->id));
         $this->assertNotNull($battle->rapper2()->get()->values()->keyBy('id')->get($user2->id));
-
-        // can users retrieve their battles?
-        $this->assertNotNull($user1->battlesRapper1()->get()->values()->keyBy('id')->get($battle->id));
-        $this->assertNotNull($user2->battlesRapper2()->get()->values()->keyBy('id')->get($battle->id));
     }
 
 
