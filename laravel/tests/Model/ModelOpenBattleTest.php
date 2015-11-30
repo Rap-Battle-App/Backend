@@ -17,9 +17,11 @@ class ModelOpenBattleTest extends TestCase
      */
     public function testInsert()
     {
+        // create users
         $user1 = factory(App\Models\User::class)->create();
         $user2 = factory(App\Models\User::class)->create();
 
+        // create OpenBattle
         $openBattle = new OpenBattle;
         $openBattle->rapper1_id = $user1->id;
         $openBattle->rapper2_id = $user2->id;
@@ -32,6 +34,7 @@ class ModelOpenBattleTest extends TestCase
         $openBattle->rapper2_round2 = '/somewhere/file4';
         $openBattle->save();
 
+        // check if it is in database
         $this->seeInDatabase('open_battles', ['rapper1_id' => $user1->id,
                                             'rapper2_id' => $user2->id,
                                             'phase' => 2,
@@ -42,7 +45,7 @@ class ModelOpenBattleTest extends TestCase
                                             'rapper1_round2' => '/somewhere/file3',
                                             'rapper2_round2' => '/somewhere/file4']);
 
-        // can rappers be retrieved?
+        // can rappers be retrieved from OpenBattle?
         $this->assertNotNull($openBattle->rapper1()->get()->values()->keyBy('id')->get($user1->id));
         $this->assertNotNull($openBattle->rapper2()->get()->values()->keyBy('id')->get($user2->id));
     }
