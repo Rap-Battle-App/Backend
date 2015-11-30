@@ -135,8 +135,8 @@ class User extends Model implements AuthenticatableContract,
     /**
      * Check whether the users device token is null
      */
-    public function isDeviceTokenNull()
+    public function hasDeviceToken()
     {
-        return is_null($this->device_token);
+        return !is_null($this->device_token);
     }
 }

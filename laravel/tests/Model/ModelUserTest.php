@@ -212,14 +212,14 @@ class ModelUserTest extends TestCase
     }
 
     /**
-     *
+     * Test for hasDeviceToken()
      */
-    public function testIsDeviceTokenNull()
+    public function testHasDeviceToken()
     {
         $user1 = factory(App\Models\User::class)->create(['device_token' => null]);
         $user2 = factory(App\Models\User::class)->create(['device_token' => 'XXX']);
 
-        $this->assertTrue($user1->isDeviceTokenNull());
-        $this->assertFalse($user2->isDeviceTokenNull());
+        $this->assertFalse($user1->hasDeviceToken());
+        $this->assertTrue($user2->hasDeviceToken());
     }
 }
