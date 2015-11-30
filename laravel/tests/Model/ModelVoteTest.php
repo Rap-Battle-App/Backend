@@ -18,14 +18,17 @@ class ModelVoteTest extends TestCase
      */
     public function testInsert()
     {
-        $user1 = factory(App\Models\User::class)->create(['rating' => 3]);
-        $user2 = factory(App\Models\User::class)->create(['rating' => 5]);
+        // create users
+        $user1 = factory(App\Models\User::class)->create();
+        $user2 = factory(App\Models\User::class)->create();
 
+        // create battle
         $battle = new Battle;
         $battle->rapper1_id = $user1->id;
         $battle->rapper2_id = $user2->id;
         $battle->save();
 
+        // create vote
         $vote1 = new Vote;
         $vote1->user_id = $user1->id;
         $vote1->battle_id = $battle->id;
@@ -43,15 +46,18 @@ class ModelVoteTest extends TestCase
      */
     public function testExtract()
     {
-        $user1 = factory(App\Models\User::class)->create(['rating' => 3]);
-        $user2 = factory(App\Models\User::class)->create(['rating' => 5]);
-        $user3 = factory(App\Models\User::class)->create(['rating' => 5]);
+        // create users
+        $user1 = factory(App\Models\User::class)->create();
+        $user2 = factory(App\Models\User::class)->create();
+        $user3 = factory(App\Models\User::class)->create();
 
+        // create battle
         $battle = new Battle;
         $battle->rapper1_id = $user1->id;
         $battle->rapper2_id = $user2->id;
         $battle->save();
 
+        // create some votes
         $vote1 = new Vote;
         $vote1->user_id = $user1->id;
         $vote1->battle_id = $battle->id;

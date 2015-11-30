@@ -14,13 +14,6 @@ class Vote extends Model
     protected $fillable = ['user_id', 'battle_id', 'rapper_number'];
     
     /**
-     * The attributes excluded from the model's JSON form.
-     *
-     * @var array
-     */
-    /* protected $hidden = ['user_id']; */
-    
-    /**
      * Get the user who voted
      */
     public function user()
