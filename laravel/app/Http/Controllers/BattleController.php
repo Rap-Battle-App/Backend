@@ -21,32 +21,38 @@ class BattleController extends Controller
         parent::__construct($AppName, $request);
     }
 
+    //return a single Battle Object identified by id
     public function getBattle($battle_id)
     {	
         return response()->json(battle['battle' => Battle::findOrFail($battle_id)]);
     }
 
 	
+    //return an Array of Battles with the most votes
     public function getTrending(Request $request)
     {
         return response()->json(battle['battle' => Battle::scopeTrending($request)]);
     }
 	
+    //return an Array of Battles that are still open for voting
     public function getOpenVoting(Request $request)
     {
         return response()->json(battle['battle' => Battle::scopeOpenVoting($request)]);
     }
 	
+    //return an Array of Battles that are no longer open for voting
     public function getCompleted()
     {
         return response()->json(battle['battle' => Battle::scopeCompleted($request)]);
     }
 	
+    //return an Array of all openBattles
     public function getOpen()
     {
         return response()->json(battle['openBattle' => OpenBattle::findAll()]);
     }
 	
+    //increase the votes of a single rapper in one battle identified by id 
     public function postVote(Request $request, $battle_id)
     {	
         $validator = Validator::make($request->all(), [
