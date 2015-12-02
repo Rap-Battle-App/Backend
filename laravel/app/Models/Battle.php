@@ -34,7 +34,8 @@ class Battle extends Model
     /**
      * Get votes
      */
-    public function votes(){
+    public function votes()
+    {
         return $this->hasMany('App\Models\Vote');
     }
 
@@ -43,8 +44,14 @@ class Battle extends Model
      */
     public function scopeTrending($query)
     {
-        $trendingcnt = config('rap-battle.trendingcnt', 5);
-        return $query->orderBy(DB::raw('votes_rapper1 + votes_rapper2'), 'desc')->take($trendingcnt);
+        $trendingperiod = config('rap-battle.trendingperiod', 168);
+
+        // battles after this date will be considered for trending
+        $timeoldest = new Carbon();
+        $timeoldest->subHours($trendingperiod);
+
+        return $query->where('created_at', '>=', $timeoldest->toDateTimeString())->orderBy(
+                        DB::raw('votes_rapper1 + votes_rapper2'), 'desc');
     }
 
     /**

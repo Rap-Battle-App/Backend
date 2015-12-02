@@ -16,15 +16,15 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Trending Count
+    | Trending Period Configuration
     |--------------------------------------------------------------------------
     |
-    | This sets the amount of trending battles that are returned
-    | default: 5
+    | This sets the time in hours a battle is considered for trending battles
+    | default: 168 (1 week)
     |
     */
 
-    'trendingcnt' => 5,
+    'trendingperiod' => 168,
 
     /*
     |--------------------------------------------------------------------------
