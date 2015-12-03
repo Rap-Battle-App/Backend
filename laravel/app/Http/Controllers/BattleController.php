@@ -1,14 +1,12 @@
 <?php
+
 namespace App\Http\Controllers;
 
 
-
-use App\Model\Battle;
-use App\Http\Controllers\Controller;
+use App\Models\Battle;
 use Illuminate\Http\Request;
-use App\User;
 use App\Http\Requests;
-use App\Http\Controllers\Controller;
+
 
 
 
@@ -16,61 +14,60 @@ use App\Http\Controllers\Controller;
 class BattleController extends Controller
 {
 
-    public function __construct($AppName, IRequest $request)
-    {
-        parent::__construct($AppName, $request);
-    }
-
     //return a single Battle Object identified by id
-    public function getBattle($battle_id)
+    public function getBattle($id) 
     {	
-        return response()->json(battle['battle' => Battle::findOrFail($battle_id)]);
+        //can't just return battle as json - need to construct ProfilePreviews for rappers and Voting (see API Diagramm)
+        return response()->json(['battle' => Battle::findOrFail($id)]);
     }
 
 	
     //return an Array of Battles with the most votes
     public function getTrending(Request $request)
     {
-        return response()->json(battle['battle' => Battle::scopeTrending($request)]);
+        return response()->json(['battle' => Battle::Trending($request)->paginate($request->input('amount'))]);
     }
 	
     //return an Array of Battles that are still open for voting
     public function getOpenVoting(Request $request)
     {
-        return response()->json(battle['battle' => Battle::scopeOpenVoting($request)]);
+        //todo: check if request contains user id (if yes return only battles by that user)
+        return response()->json(['battle' => Battle::OpenVoting($request)->paginate($request->input('amount'))]);
     }
 	
-    //return an Array of Battles that are no longer open for voting
+    //return all Battles that are no longer open for voting for the current user
     public function getCompleted()
     {
-        return response()->json(battle['battle' => Battle::scopeCompleted($request)]);
+        //todo: check if request contains user id (if yes return only battles by that user)
+        return response()->json(['battle' => Auth::user()->battles()->completed()->paginate($request->input('amount'))]);
     }
 	
-    //return an Array of all openBattles
+    //return an Array of all openBattles for the current user
     public function getOpen()
     {
-        return response()->json(battle['openBattle' => OpenBattle::findAll()]);
+        //use pagination or return all?
+        return response()->json(['openBattle' => Auth::user()->battles()->open()->paginate($request->input('amount'));]);
     }
 	
     //increase the votes of a single rapper in one battle identified by id 
     public function postVote(Request $request, $battle_id)
     {	
-        $validator = Validator::make($request->all(), [
+        $validator = $this->validate($request->all(), [
             'rapper_number' => 'required|boolean'   
         ]);
 		
         $user_id = Auth::user()->id;
-        $battle=getBattle($battle_id);
+        $battle=Battle::find($battle_id);
 				
         //build new vote
         $vote = new Vote;
         $vote->user_id = $user_id;
         $vote->battle_id = $battle->id;
-        $vote->rapper_number = $request->rapper_number;
+        $vote->rapper_number = $request->input('rapper_number');
 				
         $vote->save();
         // update vote counter
-        if($vote->rapper_number == 0){
+        if($vote->rapper_number == 1){
             $battle->votes_rapper1++;
         } else {
             $battle->votes_rapper2++;
