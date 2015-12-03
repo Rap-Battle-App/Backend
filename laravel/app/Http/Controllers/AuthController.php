@@ -49,7 +49,7 @@ class AuthController extends Controller
     }
 
 
-	protected function postLogin(array $data)
+    protected function postLogin(array $data)
     {
         Auth::login($data->user);
     }
@@ -60,9 +60,9 @@ class AuthController extends Controller
      *
      * @param  array  $data
      * @return UserId
-	*/
+    */
 
-	protected function postRegister(array $data)
+    protected function postRegister(array $data)
     {
         $user = User::create([
             'username' => $data['name'],
@@ -70,16 +70,16 @@ class AuthController extends Controller
             'password' => bcrypt($data['password']),
         ]);
 
-		return $user->$id;
+        return $user->$id;
     }
 
 
-	protected function getLogout()
+    protected function getLogout()
     {
         Auth::logout(Auth::user()->id;);
     }
 
-	protected function getId()
+    protected function getId()
     {
         return Auth::user()->id;
     }
