@@ -18,35 +18,36 @@ class BattleController extends Controller
     public function getBattle($id) 
     {	
         //can't just return battle as json - need to construct ProfilePreviews for rappers and Voting (see API Diagramm)
-        return response()->json(['battle' => Battle::findOrFail($id)]);
+        // use map
+        return response()->json(Battle::findOrFail($id));
     }
 
 	
     //return an Array of Battles with the most votes
     public function getTrending(Request $request)
     {
-        return response()->json(['battle' => Battle::Trending($request)->paginate($request->input('amount'))]);
+        return response()->json(Battle::trending()->paginate($request->input('amount')));
     }
 	
     //return an Array of Battles that are still open for voting
     public function getOpenVoting(Request $request)
     {
         //todo: check if request contains user id (if yes return only battles by that user)
-        return response()->json(['battle' => Battle::OpenVoting($request)->paginate($request->input('amount'))]);
+        return response()->json(Battle::openVoting()->paginate($request->input('amount')));
     }
 	
     //return all Battles that are no longer open for voting for the current user
     public function getCompleted()
     {
         //todo: check if request contains user id (if yes return only battles by that user)
-        return response()->json(['battle' => Auth::user()->battles()->completed()->paginate($request->input('amount'))]);
+        return response()->json(Auth::user()->battles()->completed()->paginate($request->input('amount')));
     }
 	
     //return an Array of all openBattles for the current user
     public function getOpen()
     {
-        //use pagination or return all?
-        return response()->json(['openBattle' => Auth::user()->battles()->open()->paginate($request->input('amount'));]);
+        
+        return response()->json(Auth::user()->battles()->open());
     }
 	
     //increase the votes of a single rapper in one battle identified by id 
