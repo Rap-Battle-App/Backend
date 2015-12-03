@@ -24,8 +24,6 @@ class PasswordController extends Controller
 
     use ResetsPasswords;
 
-    private $subject = trans('password-recovery.email-title');
-
     /**
      * Send a reset link to the given user.
      * Overwritten function of ResetsPassword trait.
@@ -38,7 +36,7 @@ class PasswordController extends Controller
         $this->validate($request, ['email' => 'required|email']);
 
         $response = Password::sendResetLink($request->only('email'), function (Message $message) {
-            $message->subject($this->getEmailSubject());
+            $message->subject(trans('password-recovery.email-title'));
         });
     }
 
