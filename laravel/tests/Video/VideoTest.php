@@ -27,6 +27,8 @@ class VideoTest extends TestCase
         $event = new App\Events\VideoWasUploaded('./tests/Video/concat.mp4', $input);
 
         Event::fire($event);
+        
+        $this->check_input($input);
     }
 
     /**
@@ -42,6 +44,8 @@ class VideoTest extends TestCase
         $event = new App\Events\VideoWasUploaded('./tests/Video/convert.mp4', $input);
 
         Event::fire($event);
+        
+        $this->check_input($input);
     }
 
     /**
