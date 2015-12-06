@@ -129,6 +129,7 @@ class User extends Model implements AuthenticatableContract,
      */
     public function scopeRatedBetween($query, $min, $max)
     {
+        $this->updateRating();
         return $query->where('rating', '>=', $min)->where('rating', '<=', $max);
     }
 
@@ -138,5 +139,27 @@ class User extends Model implements AuthenticatableContract,
     public function hasDeviceToken()
     {
         return !is_null($this->device_token);
+    }
+
+    /**
+     * update the rating of a user, as well as wins and defeats
+     * at the moment a user gets three points for each won battle
+     * plus one point for each defeat (for participation)
+     */
+    public function updateRating()
+    {
+        if($this->getCompleted()->rapper1_id == $this->id)
+        {
+            $this->wins=$this->getCompleted()->where(votes_rapper1>votes_rapper2);
+            $this->defeats=$this->getCompleted()->where(votes_rapper1<votes_rapper2);
+            $this->rating=$this->wins*3+$this->defeats;
+        }
+        else
+        {
+            $this->wins=$this->getCompleted()->where(votes_rapper2>votes_rapper1);
+            $this->defeats=$this->getCompleted()->where(votes_rapper2<votes_rapper1);
+            $this->rating=$this->wins*3+$this->defeats;
+        }
+        $this->save;
     }
 }
