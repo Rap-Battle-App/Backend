@@ -25,7 +25,7 @@ class ControllerBattleTest extends TestCase
              ->seeJson([
                 'rapper1_id' => $user1->id,
                 'rapper2_id' => $user2->id,
-                'video' = "/path/to/file",
+                'video' => "/path/to/file",
                 'votes_rapper1' => 45,
                 'votes_rapper2' => 86
              ]);
@@ -57,41 +57,50 @@ class ControllerBattleTest extends TestCase
  
 
         //check possible conflicts with array
-        //assuming trendingcnt is set to 5 (default)
+        $this->get('battle/trending')
+             ->seeJson([
+                'rapper1_id' => $user1->id,
+                'rapper2_id' => $user2->id,
+                'video' => "/path/to/file",
+                'votes_rapper1' => 11,
+                'votes_rapper2' => 12
+
+             ]);
+        /*
         $this->get('battle/trending')
              ->seeJson([
                 {'rapper1_id' => $user1->id,
                 'rapper2_id' => $user2->id,
-                'video' => "/path/to/file";
+                'video' => "/path/to/file",
                 'votes_rapper1' => 11,
                 'votes_rapper2' => 12},
 
                 {'rapper1_id' => $user1->id,
                 'rapper2_id' => $user2->id,
-                'video' => "/path/to/file";
+                'video' => "/path/to/file",
                 'votes_rapper1' => 10,
                 'votes_rapper2' => 11},
 
                 {'rapper1_id' => $user1->id,
                 'rapper2_id' => $user2->id,
-                'video' => "/path/to/file";
+                'video' => "/path/to/file",
                 'votes_rapper1' => 9,
                 'votes_rapper2' => 10},
 
                 {'rapper1_id' => $user1->id,
                 'rapper2_id' => $user2->id,
-                'video' => "/path/to/file";
+                'video' => "/path/to/file",
                 'votes_rapper1' => 8,
                 'votes_rapper2' => 9},
 
                 {'rapper1_id' => $user1->id,
                 'rapper2_id' => $user2->id,
-                'video' => "/path/to/file";
+                'video' => "/path/to/file",
                 'votes_rapper1' => 7,
                 'votes_rapper2' => 8}
 
              ]);
-
+*/
     }
 
     /**
@@ -201,8 +210,21 @@ class ControllerBattleTest extends TestCase
         $battle1->rapper1_round2 = "/path/to/rapper1_round2_b";
         $battle1->save();
         
+        $this->get('battle/open')
+             ->seeJson([
+                'rapper1_id' => $user1->id,
+                'rapper2_id' => $user2->id,
+                'phase' => 1,
+                'beat1_id' => 1,
+                'rapper1_round1' => "/path/to/rapper1_round1",
+                'rapper2_round2' => "/path/to/rapper2_round2",
+                'beat2_id' => 2,
+                'rapper2_round1' => "/path/to/rapper2_round1",
+                'rapper1_round2' => "/path/to/rapper1_round2"
 
-       
+                
+             ]);
+        /*       
         $this->get('battle/open')
              ->seeJson([
                 {'rapper1_id' => $user1->id,
@@ -227,6 +249,7 @@ class ControllerBattleTest extends TestCase
 
                 
              ]);
+         */
     }	
 
     /**
@@ -250,7 +273,7 @@ class ControllerBattleTest extends TestCase
         
 
 
-        $this->get('battle{id}/vote', ['id' => $battle->id, 'rapper_number' => 1);
+        $this->get('battle{id}/vote', ['id' => $battle->id, 'rapper_number' => 1]);
 
         $this->assertEquals(3, $battle1->votes_rapper1);
 
