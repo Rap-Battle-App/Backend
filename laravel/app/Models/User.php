@@ -9,6 +9,8 @@ use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use App\Http\Controllers\BattleController;
+
 
 class User extends Model implements AuthenticatableContract,
                                     AuthorizableContract,
@@ -150,14 +152,14 @@ class User extends Model implements AuthenticatableContract,
     {
         if($this->getCompleted()->rapper1_id == $this->id)
         {
-            $this->wins=$this->getCompleted()->where(votes_rapper1>votes_rapper2);
-            $this->defeats=$this->getCompleted()->where(votes_rapper1<votes_rapper2);
+            $this->wins=$this->battles()->completed()->where(votes_rapper1>votes_rapper2);
+            $this->defeats=$this->battles()->completed()->where(votes_rapper1<votes_rapper2);
             $this->rating=$this->wins*3+$this->defeats;
         }
         else
         {
-            $this->wins=$this->getCompleted()->where(votes_rapper2>votes_rapper1);
-            $this->defeats=$this->getCompleted()->where(votes_rapper2<votes_rapper1);
+            $this->wins=$this->battles()->completed()->where(votes_rapper2>votes_rapper1);
+            $this->defeats=$this->battles()->completed()->where(votes_rapper2<votes_rapper1);
             $this->rating=$this->wins*3+$this->defeats;
         }
         $this->save;

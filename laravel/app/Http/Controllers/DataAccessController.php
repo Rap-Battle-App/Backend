@@ -13,7 +13,7 @@ class DataAccessController extends Controller
         $pathToFile = Storage::get($id);
         return response()->download($pathToFile);
     }
-	
+
     // returns the video of a battle identified by id
     public function getVideo($id)
     {
