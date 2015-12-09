@@ -16,27 +16,27 @@ class UserController extends Controller
      */
 
 
-    public function getProfile($id)
+    public function getProfile(Request $id)
     {
-        $validator = Validator::make($request->all(), [
+        $this->validate = Validator::make($request->all(), [
             'id' => 'required|integer|unique:posts|max:10'
         ]);
 
             
-            $user = findOrFail($id);
+            $user = User::findOrFail($id);
 
-            $BattleStatisctics = array();
-            $BattleStatisctics->wins = $user->wins;
-            $BattleStatisctics->defeats = $user->defeats;
+            $battleStatistics = array();
+            $battleStatistics->wins = $user->wins;
+            $battleStatistics->defeats = $user->defeats;
 
-            $Profile = array();
-            $Profile->id = $user->id;
-            $Profile->username = $user->name;
-            $Profile->profile_picture = $user->picture;
-            $Profile->city = $user->city;
-            $Profile->about_me = $user->about_me;
-            $Profile->statisctics = $BattleStatisctics;
-            $Profile->rapper = $user->rapper;
+            $profile = array();
+            $profile->id = $user->id;
+            $profile->username = $user->name;
+            $profile->profile_picture = $user->picture;
+            $profile->city = $user->city;
+            $profile->about_me = $user->about_me;
+            $profile->statisctics = $battleStatistics;
+            $profile->rapper = $user->rapper;
             
 
             return $profile;
@@ -45,15 +45,16 @@ class UserController extends Controller
 
     public function postProfileInformation(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'city' => 'required|varchar|max:255',
-            'about_me' => 'required|varchar|max:512'
+        $this->validate = Validator::make($request->all(), [
+            'city' => /*required|*/'string|max:255',       // just made is as a comment now so in case it is needed it can be uncommented fast.
+            'about_me' => /*required|*/'string|max:512'
         ]);
 
         
-            $id = Auth::user()->user_id;
-            $user = findOrFail($id);
-              
+            /*$id = Auth::user()->id;
+            $user = findOrFail($id);*/
+            $user = $request->user();
+
             $user->city = $request->city;
             $user->about_me = $request->about_me;
            
@@ -63,14 +64,15 @@ class UserController extends Controller
 
     public function postProfilePicture(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'picture' => 'required|byte'
+        $this->validate = Validator::make($request->all(), [
+            'picture' => /*required*/'|byte'
         ]);
 
         
-            $id = Auth::user()->user_id;
-            $user = findOrFail($id);
-                   
+            /*$id = Auth::user()->id;
+            $user = findOrFail($id);*/
+            $user = $request->user();
+
             $user->picture = $request->picture;        
 
             $user->save();
@@ -79,7 +81,7 @@ class UserController extends Controller
     public function getSettings()
     {
         
-            $id = Auth::user()->user_id;
+            $id = Auth::user()->id;
 
             $user = findOrFail($id);
             $settings = array();
@@ -91,15 +93,16 @@ class UserController extends Controller
     }
     public function postSettings(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $this->validate = Validator::make($request->all(), [
             'rapper' => 'required|boolean',
             'notifications' => 'required|boolean'
         ]);
 
         
             
-            $id = Auth::user()->user_id;
-            $user = findOrFail($id);
+            /*$id = Auth::user()->id;
+            $user = findOrFail($id);*/
+            $user = $request->user();
             $user->rapper = $request->rapper; 
             $user->notifications = $request->notifications;
             $user->save();
@@ -108,15 +111,16 @@ class UserController extends Controller
     }
     public function postUsername(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $this->validate = Validator::make($request->all(), [
             'rapper' => 'required|bit',
             'notifications' => 'required|bit'
         ]);
 
         
-            $id = Auth::user()->user_id;
-            $user = findOrFail($id);
-                   
+            /*$id = Auth::user()->id;
+            $user = findOrFail($id);*/
+            $user = $request->user();
+
             $user->name = $request->username;        
 
             $user->save();
@@ -124,17 +128,18 @@ class UserController extends Controller
     }
     public function postPassword(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'old_password' => 'required|varchar|max:60',
-            'password' => 'required|vatchar|max:60'
+        $this->validate = Validator::make($request->all(), [
+            'old_password' => 'required|string|min:6',       //
+            'password' => 'required|string|min:6'
         ]);
 
-    
-            $id = Auth::user()->user_id;
-            $user = findOrFail($id);
-            $request->old_password = Hash::make($request->old_password);       
+            $options = array('cost' => 15);
+            /*$id = Auth::user()->id;
+            $user = findOrFail($id);*/
+            $user = $request->user();
+            $request->old_password = password_hash($request->old_password,PASSWORD_BCRYPT,$options);//old --> Hash::make($request->old_password);       
             if($request->old_password == $user->password){
-                $user->password = Hash::make($request->password);
+                $user->password = password_hash($request->password,PASSWORD_BCRYPT,$options); // old --> Hash::make($request->password);
                 $user->save();        
             }
            

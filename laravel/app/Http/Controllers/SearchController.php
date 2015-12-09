@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\User;
-use App\Http\Requests;
-use App\Http\Controllers\Controller;
+use App\Models\User;
 
 class SearchController extends Controller
 {
@@ -18,15 +16,15 @@ class SearchController extends Controller
 
     public function postSearch(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $this->$validate = Validator::make($request->all(), [
             'search_string' => 'required|string'
         ]);
 
-           $user = App\User::findOrFail($search_string);            //might be a buggy line
-           $profilePreview = array();
-           $profilePreview->user_id = $user->id; 
-           $profilePreview->username = $user->name;
-           $profilePreview->profile_picture = $user->picture;
+            $user = findOrFail($search_string);            //might be a buggy line 
+            $profilePreview = array();
+            $profilePreview['user_id'] = $user->id; 
+            $profilePreview['username'] = $user->name;
+            $profilePreview['profile_picture'] = $user->picture;
             return $profilePreview;
         
     }
