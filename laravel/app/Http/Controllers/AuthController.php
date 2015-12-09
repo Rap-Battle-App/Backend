@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Auth;
 use App\User;
 use Validator;
 use App\Http\Controllers\Controller;
@@ -44,7 +45,7 @@ class AuthController extends Controller
         return Validator::make($data, [
             'name' => 'required|max:255',
             'email' => 'required|email|max:255|unique:users',
-            'password' => 'required|confirmed|min:6',
+            'password' => 'required|confirmed|min:6'
         ]);
     }
 
@@ -52,6 +53,8 @@ class AuthController extends Controller
     protected function postLogin(array $data)
     {
         Auth::login($data->user);
+
+        return Auth::user()->id;
     }
 
 
@@ -67,8 +70,9 @@ class AuthController extends Controller
         $user = User::create([
             'username' => $data['name'],
             'email' => $data['email'],
-            'password' => bcrypt($data['password']),
+            'password' => bcrypt($data['password'])
         ]);
+        $user->save();
 
         return $user->$id;
     }
@@ -76,7 +80,7 @@ class AuthController extends Controller
 
     protected function getLogout()
     {
-        Auth::logout(Auth::user()->id;);
+        Auth::logout(Auth::user()->id);
     }
 
     protected function getId()

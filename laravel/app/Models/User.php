@@ -9,6 +9,8 @@ use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use App\Http\Controllers\BattleController;
+
 
 class User extends Model implements AuthenticatableContract,
                                     AuthorizableContract,
@@ -129,6 +131,7 @@ class User extends Model implements AuthenticatableContract,
      */
     public function scopeRatedBetween($query, $min, $max)
     {
+        //$this->updateRating();
         return $query->where('rating', '>=', $min)->where('rating', '<=', $max);
     }
 
@@ -138,5 +141,30 @@ class User extends Model implements AuthenticatableContract,
     public function hasDeviceToken()
     {
         return !is_null($this->device_token);
+    }
+
+    /**
+     * update the rating of a user, as well as wins and defeats
+     * at the moment a user gets three points for each won battle
+     * plus one point for each defeat (for participation)
+     */
+    public function updateRating()
+    {
+        //under construction
+
+        //foreach($completed as $battle){}
+        if($this->battles()->completed()->rapper1_id == $this->id)
+        {
+            $this->wins=$this->battles()->completed()->where(votes_rapper1>votes_rapper2);
+            $this->defeats=$this->battles()->completed()->where(votes_rapper1<votes_rapper2);
+            $this->rating=$this->wins*3+$this->defeats;
+        }
+        else
+        {
+            $this->wins=$this->battles()->completed()->where(votes_rapper2>votes_rapper1);
+            $this->defeats=$this->battles()->completed()->where(votes_rapper2<votes_rapper1);
+            $this->rating=$this->wins*3+$this->defeats;
+        }
+        $this->save;
     }
 }
