@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Auth;
 use App\User;
 use Validator;
 use App\Http\Controllers\Controller;
@@ -52,6 +53,8 @@ class AuthController extends Controller
     protected function postLogin(array $data)
     {
         Auth::login($data->user);
+
+        return Auth::user()->id;
     }
 
 
@@ -69,6 +72,7 @@ class AuthController extends Controller
             'email' => $data['email'],
             'password' => bcrypt($data['password'])
         ]);
+        $user->save();
 
         return $user->$id;
     }
@@ -76,7 +80,7 @@ class AuthController extends Controller
 
     protected function getLogout()
     {
-        Auth::logout(Auth::user()->id;
+        Auth::logout(Auth::user()->id);
     }
 
     protected function getId()

@@ -9,6 +9,8 @@ use App\Http\Requests;
 use App\Models\OpenBattle;
 
 
+//todo: correct api response format 
+
 //use Illuminate\Support\Facades\Auth;
 
 class BattleController extends Controller
@@ -44,7 +46,7 @@ class BattleController extends Controller
         //return response()->json(Auth::user()->battles()->completed()->paginate($request->input('amount')));
 
         //in case no user id is send, return all
-        //return response()->json(Battle::completed()->paginate($request->input('amount')));
+        //return response()->json(Battle::completed()->paginate($request->input('amount'))); //paginate not supported/needed
         return response()->json(Battle::completed());
         //take care of amount
     }

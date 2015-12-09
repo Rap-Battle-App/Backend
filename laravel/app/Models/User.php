@@ -131,7 +131,7 @@ class User extends Model implements AuthenticatableContract,
      */
     public function scopeRatedBetween($query, $min, $max)
     {
-        $this->updateRating();
+        //$this->updateRating();
         return $query->where('rating', '>=', $min)->where('rating', '<=', $max);
     }
 
@@ -150,7 +150,10 @@ class User extends Model implements AuthenticatableContract,
      */
     public function updateRating()
     {
-        if($this->getCompleted()->rapper1_id == $this->id)
+        //under construction
+
+        //foreach($completed as $battle){}
+        if($this->battles()->completed()->rapper1_id == $this->id)
         {
             $this->wins=$this->battles()->completed()->where(votes_rapper1>votes_rapper2);
             $this->defeats=$this->battles()->completed()->where(votes_rapper1<votes_rapper2);
