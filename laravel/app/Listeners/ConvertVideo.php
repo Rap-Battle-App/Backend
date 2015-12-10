@@ -80,8 +80,17 @@ class ConvertVideo implements ShouldQueue
             $audiocodec = config('rap-battle.audio_codec', $format->getAudioCodec());
             $format->setAudioCodec($audiocodec);
 
-            // save video
-            $videos[0]->save($format, $event->outfile);
+            // convert / concatenate video
+            try {
+                $videos[0]->save($format, $event->outfile);
+            } catch(Exception $e){
+                // TODO: handle exception: video could not be converted / concatenated
+                throw $e;
+            }
+
+            // delete original video file(s) after successful conversion
+            if($event->deleteOnSuccess)
+                foreach($event->infiles as $file) unlink($file);
         }
     }
 }
