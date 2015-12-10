@@ -3,9 +3,8 @@
 namespace App\Http\Controllers;
 
 use Auth;
-use App\User;
+use App\Models\User;
 use Validator;
-use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
 
@@ -37,22 +36,22 @@ class AuthController extends Controller
     /**
      * Get a validator for an incoming registration request.
      *
-     * @param  array  $data
+     * @param  array  $request
      * @return \Illuminate\Contracts\Validation\Validator
      */
-    protected function validator(array $data)
+    protected function validator(array $request)
     {
-        return Validator::make($data, [
-            'name' => 'required|max:255',
+        return Validator::make($request, [
+            'name' => 'required|max:255|unique:users',   
             'email' => 'required|email|max:255|unique:users',
-            'password' => 'required|confirmed|min:6'
+            'password' => 'required|min:6'   
         ]);
     }
 
 
-    protected function postLogin(array $data)
+    protected function postLogin(array $request)
     {
-        Auth::login($data->user);
+        Auth::login($request->user);
 
         return Auth::user()->id;
     }
@@ -61,16 +60,16 @@ class AuthController extends Controller
     /**
      * Create a new user instance after a valid registration.
      *
-     * @param  array  $data
+     * @param  array  $request
      * @return UserId
     */
 
-    protected function postRegister(array $data)
+    public function postRegister(array $request)
     {
         $user = User::create([
-            'username' => $data['name'],
-            'email' => $data['email'],
-            'password' => bcrypt($data['password'])
+            'name' => $request['name'],
+            'email' => $request['email'],
+            'password' => bcrypt($request['password'])
         ]);
         $user->save();
 
@@ -78,14 +77,15 @@ class AuthController extends Controller
     }
 
 
-    protected function getLogout()
+    public function getLogout()
     {
         Auth::logout(Auth::user()->id);
     }
 
-    protected function getId()
+    public function getId()
     {
-        return Auth::user()->id;
+        //return Auth::user()->id;
+        return $this->middleware('auth', ['except' => ['getId']]);
     }
 
 
