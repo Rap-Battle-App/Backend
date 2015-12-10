@@ -131,7 +131,7 @@ class User extends Model implements AuthenticatableContract,
      */
     public function scopeRatedBetween($query, $min, $max)
     {
-        //$this->updateRating();
+        $this->updateRating();
         return $query->where('rating', '>=', $min)->where('rating', '<=', $max);
     }
 
@@ -150,20 +150,22 @@ class User extends Model implements AuthenticatableContract,
      */
     public function updateRating()
     {
-        //under construction
+        //not yet tested
 
-        //foreach($completed as $battle){}
-        if($this->battles()->completed()->rapper1_id == $this->id)
-        {
-            $this->wins=$this->battles()->completed()->where(votes_rapper1>votes_rapper2);
-            $this->defeats=$this->battles()->completed()->where(votes_rapper1<votes_rapper2);
-            $this->rating=$this->wins*3+$this->defeats;
-        }
-        else
-        {
-            $this->wins=$this->battles()->completed()->where(votes_rapper2>votes_rapper1);
-            $this->defeats=$this->battles()->completed()->where(votes_rapper2<votes_rapper1);
-            $this->rating=$this->wins*3+$this->defeats;
+        foreach($completed as $battle){
+            if($this->battle()->rapper1_id == $this->id)
+            {
+                $this->wins=$this->battle()->where(votes_rapper1>votes_rapper2);
+                $this->defeats=$this->battle()->where(votes_rapper1<votes_rapper2);
+                $this->rating=$this->wins*3+$this->defeats;
+            }
+            else
+            {
+                $this->wins=$this->battle()->where(votes_rapper2>votes_rapper1);
+                $this->defeats=$this->battle()->where(votes_rapper2<votes_rapper1);
+                $this->rating=$this->wins*3+$this->defeats;
+            }
+            
         }
         $this->save;
     }
