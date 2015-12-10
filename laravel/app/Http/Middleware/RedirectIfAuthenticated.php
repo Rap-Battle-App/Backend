@@ -35,6 +35,10 @@ class RedirectIfAuthenticated
     public function handle($request, Closure $next)
     {
         if ($this->auth->check()) {
+            // Don't redirect if it's an AJAX-Request. Send status code instead.
+            if ($request->ajax()) {
+                return response('Method Not Allowed.', 405);
+            }
             return redirect('/home');
         }
 

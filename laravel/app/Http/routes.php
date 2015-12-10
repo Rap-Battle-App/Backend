@@ -21,6 +21,9 @@ Route::group(['prefix' => 'auth'], function () {
     Route::get('id', 'AuthController@getId');
 });
 
+/**
+ * Password Recovery Routes
+ */
 Route::group(['prefix' => 'password-recovery', 'middleware' => 'guest'], function() {
     Route::post('email', 'PasswordController@postEmail');
     Route::post('reset', 'PasswordController@postReset');
