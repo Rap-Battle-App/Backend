@@ -21,34 +21,105 @@ class BattleController extends Controller
     {	
         //can't just return battle as json - need to construct ProfilePreviews for rappers and Voting (see API Diagramm)
         // use map
-        return response()->json(Battle::findOrFail($id));
-        //return Battle::findOrFail($id);
+        //return response()->json(Battle::findOrFail($id));
+
+	/*
+		$collection = collect([1, 2, 3, 4, 5]);
+
+		$multiplied = $collection->map(function ($item, $key) {
+			return $item * 2;
+		});
+
+		$multiplied->all();
+
+	// [2, 4, 6, 8, 10]
+	*/
+
+    /*
+        //json request returrns array
+        $collection = collect(response()->json(Battle::findOrFail($id)));
+
+        $format = $collection->map(function ($item, $key) {
+            if($item=='rapper1_id')
+            {
+                return 'rapper1'=> getProfile($item);
+            }
+            if($item=='rapper2_id')
+            {
+                return 'rapper2'=> getProfile($item);
+            }
+            if($item=='votes_rapper1')
+            {
+                return Voting; //?
+            }
+            if($item=='votes_rapper2')
+            {
+                return;
+            }
+            return $item * 2;
+        });
+
+		$format->all();
+
+	// [2, 4, 6, 8, 10]
+	*/
+
+
+
+        return Battle::findOrFail($id);
     }
 	
     //return an Array of Battles with the most votes
     public function getTrending(Request $request)
     {
-        return response()->json(Battle::trending()->paginate($request->input('amount')));
-        //return Battle::trending();
+        return Battle::trending()->paginate($request->input('amount'));
     }
 	
     //return an Array of Battles that are still open for voting
     public function getOpenVoting(Request $request)
     {
-        //todo: check if request contains user id (if yes return only battles by that user)
-        return response()->json(Battle::openVoting()->paginate($request->input('amount')));
+        //check if request contains user id (if yes return only battles by that user)
+        if($request->input('user_id'))
+        {
+            return Battle::openVoting()->where(function($query){
+                $query->where('rapper1_id', '==', $request->input('user_id'))
+                      ->orWhere('rapper2_id', '==', $request->input('user_id'));
+        });
+
+        }
+        else
+        {
+            return Battle::openVoting()->paginate($request->input('amount'));
+        }
     }
 	
     //return all Battles that are no longer open for voting for the current user
     public function getCompleted()
     {
-        //todo: check if request contains user id (if yes return only battles by that user)
+        //check if request contains user id (if yes return only battles by that user)
         //return response()->json(Auth::user()->battles()->completed()->paginate($request->input('amount')));
+        /*
+        if($request->input('user_id'))
+        {
+            return response()->json(Battle::completed()->where(function($query){
+                $query->where('rapper1_id', '==', $request->input('user_id'))
+                      ->orWhere('rapper2_id', '==', $request->input('user_id'));
+        }));
 
-        //in case no user id is send, return all
-        //return response()->json(Battle::completed()->paginate($request->input('amount'))); //paginate not supported/needed
+        }
+        else
+        {
+            //return Battle::completed()->paginate($request->input('amount'));
+            //return response()->json(Battle::completed()->paginate($request->input('amount')));
+            return response()->json(Battle::completed());
+        }
+*/
         return response()->json(Battle::completed());
-        //take care of amount
+        //return response()->json(Battle::completed()->paginate($request->input('amount')));
+
+        //return response()->json(Battle::completed());
+        //return Battle::completed();   //routing error for unknown reasons
+        
     }
 	
     //return an Array of all openBattles for the current user
@@ -57,8 +128,13 @@ class BattleController extends Controller
         //todo: check if request contains user id (if yes return only battles by that user)
         //return response()->json(Auth::user()->battles()->open());
         //return response()->json(Battle::open());
-        return response()->json(OpenBattle::all());
-        //return OpenBattle::getAll();
+        //return response()->json(OpenBattle::all());
+
+        /*return OpenBattle::all()->where(function($query){
+                $query->where('rapper1_id', '==', $request->input('user_id'))
+                      ->orWhere('rapper2_id', '==', $request->input('user_id'));
+        });*/
+        return OpenBattle::all();
     }
 	
     //increase the votes of a single rapper in one battle identified by id 
