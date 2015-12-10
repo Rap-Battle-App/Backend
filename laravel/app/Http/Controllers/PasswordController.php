@@ -29,7 +29,7 @@ class PasswordController extends Controller
      * Overwritten function of ResetsPassword trait.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return void
      */
     public function postEmail(Request $request)
     {
@@ -45,7 +45,7 @@ class PasswordController extends Controller
      * Overwritten function of ResetsPassword trait.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return mixed
      */
     public function postReset(Request $request)
     {

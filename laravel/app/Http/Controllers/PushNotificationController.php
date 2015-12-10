@@ -6,8 +6,11 @@ use Illuminate\Http\Request;
 
 class PushNotificationController extends Controller
 {
-    /*
-     *  Sets the device token for authenticated user.
+    /**
+     * Set the device token for authenticated user.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return void
      */
     public function postToken(Request $request)
     {
