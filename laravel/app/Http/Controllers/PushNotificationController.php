@@ -6,6 +6,16 @@ use Illuminate\Http\Request;
 
 class PushNotificationController extends Controller
 {
+    /*
+    |--------------------------------------------------------------------------
+    | Push Notification Controller
+    |--------------------------------------------------------------------------
+    |
+    | This controller is responsible for handling the information needed
+    | to send push notifications to a user.
+    |
+    */
+
     /**
      * Set the device token for authenticated user.
      *
