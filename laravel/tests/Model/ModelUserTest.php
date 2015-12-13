@@ -23,7 +23,7 @@ class ModelUserTest extends TestCase
         $password = bcrypt('123&qweRTZ3');
 
         $user = new User;
-        $user->name = 'Peter';
+        $user->username = 'Peter';
         $user->email = 'peter@foo.com';
         $user->password = $password;
         $user->city = 'Musterhausen';
@@ -31,7 +31,7 @@ class ModelUserTest extends TestCase
 
         $user->save();
 
-        $this->seeInDatabase('users', ['name' => 'Peter',
+        $this->seeInDatabase('users', ['username' => 'Peter',
                                     'email' => 'peter@foo.com',
                                     'password' => $password,
                                     'city' => 'Musterhausen',
@@ -47,13 +47,13 @@ class ModelUserTest extends TestCase
     {
         $password = bcrypt('Pa$$w0rd');
 
-        $user = App\Models\User::create(['name' => 'Hans',
+        $user = App\Models\User::create(['username' => 'Hans',
                                         'email' => 'Hans@bar.de',
                                         'password' => $password,
                                         'city' => 'Beispieldorf',
                                         'about_me' => 'This is my text']);
 
-        $this->seeInDatabase('users', ['name' => 'Hans', 
+        $this->seeInDatabase('users', ['username' => 'Hans', 
                                         'email' => 'Hans@bar.de',
                                         'password' => $password,
                                         'city' => 'Beispieldorf',
