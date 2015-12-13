@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Auth;
-use App\Models\User;
-use Validator;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
+use Illuminate\Cache\RateLimiter;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Validator;
+use Auth;
+use App\Models\User;
 
 class AuthController extends Controller
 {
@@ -23,6 +26,8 @@ class AuthController extends Controller
 
     use AuthenticatesAndRegistersUsers, ThrottlesLogins;
 
+    private $username = 'username';
+
     /**
      * Create a new authentication controller instance.
      *
@@ -30,63 +35,124 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('guest', ['except' => 'getLogout']);
+        $this->middleware('guest', ['except' => ['getLogout', 'getId']]);
+        $this->middleware('auth', ['only' => 'getId']);
     }
 
     /**
-     * Get a validator for an incoming registration request.
+     * Redirect the user after determining they are locked out.
+     * Overwritten function of ThrottlesLogins trait.
      *
-     * @param  array  $request
-     * @return \Illuminate\Contracts\Validation\Validator
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    protected function validator(array $request)
+    protected function sendLockoutResponse(Request $request)
     {
-        return Validator::make($request, [
-            'name' => 'required|max:255|unique:users',   
-            'email' => 'required|email|max:255|unique:users',
-            'password' => 'required|min:6'   
-        ]);
+        $seconds = app(RateLimiter::class)->availableIn(
+            $request->input('username').$request->ip()
+        );
+
+        // Send a JsonResponse containing the lockout message.
+        return new JsonResponse(['username' => [$this->getLockoutErrorMessage($seconds)]], 422);
     }
-
-
-    protected function postLogin(array $request)
-    {
-        Auth::login($request->user);
-
-        return Auth::user()->id;
-    }
-
 
     /**
-     * Create a new user instance after a valid registration.
-     *
-     * @param  array  $request
-     * @return UserId
+    * Return the users ID after successful authentication.
+    *
+    * @param  \Illuminate\Http\Request  $request
+    * @param  \App\Modles\User  $user
+    * @return \Illuminate\Http\JsonResponse
     */
-
-    public function postRegister(array $request)
+    protected function authenticated(Request $request, User $user)
     {
+        return new JsonResponse(['user_id' => $user->id]);
+    }
+
+    /**
+     * Handle a login request to the application.
+     * Overwritten funtion of AuthenticatesUsers trait.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function postLogin(Request $request)
+    {
+        $this->validate($request, [
+            'username' => 'required',
+            'password' => 'required'
+        ]);
+
+        // If the class is using the ThrottlesLogins trait, we can automatically throttle
+        // the login attempts for this application. We'll key this by the username and
+        // the IP address of the client making these requests into this application.
+        $throttles = $this->isUsingThrottlesLoginsTrait();
+
+        if ($throttles && $this->hasTooManyLoginAttempts($request)) {
+            return $this->sendLockoutResponse($request);
+        }
+
+        $credentials = $this->getCredentials($request);
+
+        // Second parameter is set to true because app users should always be remembered.
+        if (Auth::attempt($credentials, true)) {
+            return $this->handleUserWasAuthenticated($request, $throttles);
+        }
+
+        // If the login attempt was unsuccessful we will increment the number of attempts
+        // to login. Of course, when this user surpasses their maximum number of attempts
+        // they will get locked out.
+        if ($throttles) {
+            $this->incrementLoginAttempts($request);
+        }
+
+        // Send a JsonResponse containing the error message.
+        return new JsonResponse(['username' => [$this->getFailedLoginMessage()]], 422);
+    }
+
+    /**
+     * Handle a registration request for the application.
+     * Overwritten function of RegistersUsers trait.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function postRegister(Request $request)
+    {
+        $this->validate($request, [
+            'username' => 'required|max:255|unique:users',
+            'email' => 'required|email|max:255|unique:users',
+            'password' => 'required|min:6'
+        ]);
+
         $user = User::create([
-            'name' => $request['name'],
+            'username' => $request['username'],
             'email' => $request['email'],
             'password' => bcrypt($request['password'])
         ]);
-        $user->save();
 
-        return $user->$id;
+        Auth::login($user);
+
+        return new JsonResponse(['user_id' => $user->id]);
     }
 
-
+    /**
+     * Log the user out of the application.
+     * Overwritten function of AuthenticatesUsers trait.
+     *
+     * @return void
+     */
     public function getLogout()
     {
-        Auth::logout(Auth::user()->id);
+        Auth::logout();
     }
 
+    /**
+    * Get the authenticated users ID.
+    *
+    * @return \Illuminate\Http\JsonResponse
+    */
     public function getId()
     {
-        //return Auth::user()->id;
-        return $this->middleware('auth', ['except' => ['getId']]);
+        return new JsonResponse(['user_id' => Auth::user()->id]);
     }
-
-
 }

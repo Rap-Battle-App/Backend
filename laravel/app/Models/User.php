@@ -22,7 +22,7 @@ class User extends Model implements AuthenticatableContract,
      * The attributes that are mass assignable.
      * @var array
      */
-    protected $fillable = ['name', 'email', 'password', 'picture', 'city', 'about_me',
+    protected $fillable = ['username', 'email', 'password', 'picture', 'city', 'about_me',
                             'rapper', 'notifications', 'wins', 'rating', 'device_token'];
 
     /**
@@ -81,7 +81,7 @@ class User extends Model implements AuthenticatableContract,
     {
         return $this->hasMany('App\Models\BattleRequest', 'challenged_id');
     }
-    
+
     /**
      * Get all battle requests of this user
      */
@@ -165,7 +165,7 @@ class User extends Model implements AuthenticatableContract,
                 $this->defeats=$this->battle()->where(votes_rapper2<votes_rapper1);
                 $this->rating=$this->wins*3+$this->defeats;
             }
-            
+
         }
         $this->save;
     }
