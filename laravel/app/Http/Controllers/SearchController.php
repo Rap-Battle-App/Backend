@@ -7,29 +7,34 @@ use App\Models\User;
 
 class SearchController extends Controller
 {
+    /*
+    |--------------------------------------------------------------------------
+    | Search Controller
+    |--------------------------------------------------------------------------
+    |
+    | This controller is responsible for handling search requests and returns
+    | a list of all matching users.
+    |
+    */
+
     /**
-     * Display a listing of the resource.
+     * Handle a search request and return all matching users.
      *
-     * @return \Illuminate\Http\Response
+     * @param  \Illumnate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
      */
-
-
     public function postSearch(Request $request)
     {
-        $this->$validate = Validator::make($request->all(), [
+        $this->validate($request, [
             'search_string' => 'required|string'
         ]);
 
-            $user = findOrFail($search_string);            //might be a buggy line 
-            $profilePreview = array();
-            $profilePreview['user_id'] = $user->id; 
-            $profilePreview['username'] = $user->name;
-            $profilePreview['profile_picture'] = $user->picture;
-            return $profilePreview;
-        
-    }
+        $users = User::namedLike($request->input('search_string'))->get();
 
-    
-    
-    
+        $profiles = $users->map(function($user, $key) {
+            return $user->profilePreview();
+        });
+
+        return response()->json(['profiles' => $profiles]);
+    }
 }

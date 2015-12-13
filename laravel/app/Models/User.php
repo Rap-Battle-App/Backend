@@ -136,11 +136,35 @@ class User extends Model implements AuthenticatableContract,
     }
 
     /**
+     * Scope a query to contain users named like $name
+     *
+     * @param string  $name
+     */
+    public function scopeNamedLike($query, $name)
+    {
+        return $query->where('username', 'like', '%'.$name.'%');
+    }
+
+    /**
      * Check whether the users device token is null
      */
     public function hasDeviceToken()
     {
         return !is_null($this->device_token);
+    }
+
+    /**
+     * Make a profile preview containing only certain informations.
+     *
+     * @return array
+     */
+    public function profilePreview()
+    {
+        return [
+            'user_id' => $this->id,
+            'username' => $this->username,
+            'profile_picture' => is_null($this->picture) ? null : route('data.picture', ['id' => $this->picture])
+        ];
     }
 
     /**
