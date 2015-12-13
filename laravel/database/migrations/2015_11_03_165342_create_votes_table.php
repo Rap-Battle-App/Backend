@@ -18,7 +18,7 @@ class CreateVotesTable extends Migration
             $table->foreign('user_id')->references('id')->on('users');
             $table->integer('battle_id')->unsigned();
             $table->foreign('battle_id')->references('id')->on('battles');
-            $table->boolean('rapper_number');
+            $table->tinyInteger('rapper_number');
             $table->timestamps();
         });
     }
