@@ -7,7 +7,6 @@ use Illuminate\Foundation\Auth\ResetsPasswords;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Http\JsonResponse;
 
 class PasswordController extends Controller
 {
@@ -67,9 +66,9 @@ class PasswordController extends Controller
 
         switch ($response) {
             case Password::INVALID_USER:
-                return new JsonResponse(['email' => [trans($response)]], 422);
+                return response()->json(['email' => [trans($response)]], 422);
             case Password::INVALID_TOKEN:
-                return new JsonResponse(['token' => [trans($response)]], 422);
+                return response()->json(['token' => [trans($response)]], 422);
         }
     }
 }

@@ -6,7 +6,6 @@ use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
 use Illuminate\Cache\RateLimiter;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use Validator;
 use Auth;
 use App\Models\User;
@@ -53,7 +52,7 @@ class AuthController extends Controller
         );
 
         // Send a JsonResponse containing the lockout message.
-        return new JsonResponse(['username' => [$this->getLockoutErrorMessage($seconds)]], 422);
+        return response()->json(['username' => [$this->getLockoutErrorMessage($seconds)]], 422);
     }
 
     /**
@@ -65,7 +64,7 @@ class AuthController extends Controller
     */
     protected function authenticated(Request $request, User $user)
     {
-        return new JsonResponse(['user_id' => $user->id]);
+        return response()->json(['user_id' => $user->id]);
     }
 
     /**
@@ -106,7 +105,7 @@ class AuthController extends Controller
         }
 
         // Send a JsonResponse containing the error message.
-        return new JsonResponse(['username' => [$this->getFailedLoginMessage()]], 422);
+        return response()->json(['username' => [$this->getFailedLoginMessage()]], 422);
     }
 
     /**
@@ -132,7 +131,7 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        return new JsonResponse(['user_id' => $user->id]);
+        return response()->json(['user_id' => $user->id]);
     }
 
     /**
@@ -153,6 +152,6 @@ class AuthController extends Controller
     */
     public function getId()
     {
-        return new JsonResponse(['user_id' => Auth::user()->id]);
+        return response()->json(['user_id' => Auth::user()->id]);
     }
 }
