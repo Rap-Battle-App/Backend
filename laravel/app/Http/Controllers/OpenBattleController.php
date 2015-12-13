@@ -8,6 +8,7 @@ use App\Models\Battle;
 use App\Models\User;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use Storage;
 
 class OpenBattleController extends Controller
 {
@@ -120,8 +121,100 @@ class OpenBattleController extends Controller
            $op_battle->save();
         
     }
+   
+    // ============================================
+    // Logic for video file naming and moving
+    // (only needed by this class)
+ 
+    /**
+     * Adds a path to a filename depending on the first two letters of the filename
+     *
+     * @return suggested (not checked) path and filename relative to the filesystem
+     */
+    private static function filePath($filename)
+    {
+        // create path for sub-directory to decrease file count per directory
+        $path = substr($filename, 0, 2);
+        return $path . '/' . $filename;
+    }
 
-    
-    
-    
+    /**
+     * Zeropadding for numbers
+     */
+    private static function zeropad($num, $lim)
+    {
+        return (strlen($num) >= $lim) ? $num : OpenBattleController::zeropad("0" . $num, $lim);
+    }
+
+    /**
+     * PHP seems not to reliably support 64bit integers on all systems
+     * This method takes a 64bit hex-coded uint from a string and increments it
+     *
+     * @return num + 1
+     */
+    private static function int64Increment($num)
+    {
+        // split string in 3 parts (<32 bits, integers are signed)
+        $lowString = substr($num, 20, 12);
+        $middleString = substr($num, 10, 10);
+        $highString = substr($num, 0, 10);
+
+        // convert strings to integer
+        $lowInt = intval($lowString, 16);
+        $middleInt = intval($middleString, 16);
+        $highInt = intval($highString, 16);
+
+        // increment
+        $lowInt++;
+        $lowStringInc = dechex($lowInt);
+        if(strlen($lowStringInc) > 12) $middleInt++; // handle overflow
+        $lowStringInc = OpenBattleController::zeropad($lowStringInc, 12);
+        $lowStringInc = substr($lowStringInc, strlen($lowStringInc) - 12, 12); // cut (on overflow)
+
+        $middleStringInc = dechex($middleInt);
+        if(strlen($middleStringInc) > 10) $highInt++; // handle overflow
+        $middleStringInc = OpenBattleController::zeropad($middleStringInc, 10);
+        $middleStringInc = substr($middleStringInc, strlen($middleStringInc) - 10, 10); // cut (on overflow)
+
+        $highStringInc = dechex($highInt);
+        $highStringInc = OpenBattleController::zeropad($highStringInc, 10);
+        $highStringInc = substr($highStringInc, strlen($highStringInc) - 10, 10); // cut (on overflow)
+
+        // concatenate strings
+        return $highStringInc . $middleStringInc . $lowStringInc;
+    }
+
+    /**
+     * Renames and moves a video file to it's right position in the filesystem
+     *
+     * @return new path and filename relative to the filesystem
+     */
+    private static function moveVideoFile($infile)
+    {
+        // get hash of video file
+        $hash = hash_file('md5', $infile);
+        // create path from filename
+        $outfile = OpenBattleController::filePath($hash);
+        // don't move file, if it already has the right path and name
+        if(strcmp($infile, $outfile) == 0) return $infile;
+
+        // collision avoidance
+        while(Storage::disk('videos')->has($outfile)){
+            // increment hash since filename already exists
+            $outfile = OpenBattleController::filePath(OpenBattleController::int64Increment(++$hash));
+        }
+
+        // move video file
+        if(Storage::disk('videos')->has($infile)){ // file is already in disk 'videos' -> simply move it
+            Storage::disk('videos')->move($infile, $outfile);
+        } else { // file is not in disk 'videos' -> write it there
+            $stream = fopen($infile, 'r+');
+            Storage::disk('videos')->writeStream($outfile, $stream);
+            fclose($stream);
+            unlink($infile);
+        }
+
+        return $outfile;
+    }
+
 }

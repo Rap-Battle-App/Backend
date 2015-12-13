@@ -38,7 +38,8 @@ class VideoTest extends TestCase
      *
      * @return void
      */
-    public function testConversion(){
+    public function testConversion()
+    {
         // This example file is smaller than the default resolution, it will be upscaled
         $input = ['./tests/Video/VID_20151120_114737_720.mp4'];
         $output = './tests/Video/convert.mp4';
@@ -57,7 +58,8 @@ class VideoTest extends TestCase
      *
      * @return void
      */
-    public function testConversionDeletion(){
+    public function testConversionDeletion()
+    {
         // This example file is smaller than the default resolution, it will be upscaled
         $input = ['./tests/Video/VID_20151120_114737_720.mp4'];
         $output = './tests/Video/convertDelete.mp4';
@@ -80,7 +82,8 @@ class VideoTest extends TestCase
      *
      * @return bool true, if files exis
      */
-    private function checkFilesExist($input){
+    private function checkFilesExist($input)
+    {
         // make $input an array if it isn't one already
         if(!is_array($input)) $input = [ $input ];
 
