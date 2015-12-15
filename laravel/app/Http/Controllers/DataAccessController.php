@@ -2,22 +2,47 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Battle;
-use Illuminate\Http\Request;
+use Storage;
 
 class DataAccessController extends Controller
 {
-    // returns the picture identified by id
-    public function getPicture($id)
+    /*
+    |--------------------------------------------------------------------------
+    | Data Access Controller
+    |--------------------------------------------------------------------------
+    |
+    | This controller is responsible for giving users access to pictures and
+    | videos stored in the storage.
+    |
+    */
+
+    /**
+     * Get a picture.
+     *
+     * @param  string  $file
+     * @return \Illuminate\Http\Response
+     */
+    public function getPicture($file)
     {
-        $pathToFile = Storage::get($id);
-        return response()->download($pathToFile);
+        $disk = Storage::disk('avatars');
+        $picture = $disk->get($file);
+        // Needs PHP Fileinfo extension
+        $type = $disk->getMimetype($file);
+        return response($picture)->header('Content-Type', $type);
     }
 
-    // returns the video of a battle identified by id
-    public function getVideo($id)
+    /**
+     * Get a video.
+     *
+     * @param  integer  $file
+     * @return \Illuminate\Http\Response
+     */
+    public function getVideo($file)
     {
-        $pathToFile = Storage::get($id);
-        return response()->download($pathToFile);
-    }	
+        $disk = Storage::disk('videos');
+        $video = $disk->get($file);
+        // Needs PHP Fileinfo extension
+        $type = $disk->getMimetype($file);
+        return response($video)->header('Content-Type', $type);
+    }
 }

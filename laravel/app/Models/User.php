@@ -33,6 +33,21 @@ class User extends Model implements AuthenticatableContract,
     protected $hidden = ['password', 'remember_token', 'email', 'device_token'];
 
     /**
+     * The attributes that should be casted to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'rapper' => 'boolean',
+        'notifications' => 'boolean'
+    ];
+
+    public function getProfilePictureAttribute()
+    {
+        return is_null($this->attributes['picture']) ? null : route('data.picture', ['file' => $this->attributes['picture']]);
+    }
+
+    /**
      * Get votes of a user
      */
     public function votes()
@@ -163,7 +178,38 @@ class User extends Model implements AuthenticatableContract,
         return [
             'user_id' => $this->id,
             'username' => $this->username,
-            'profile_picture' => is_null($this->picture) ? null : route('data.picture', ['id' => $this->picture])
+            'profile_picture' => $this->profile_picture
+        ];
+    }
+
+    /**
+     * Make a profile with all relevant information representing the user.
+     *
+     * @return array
+     */
+    public function profile()
+    {
+        return [
+            'id' => $this->id,
+            'username' => $this->username,
+            'profile_picture' => $this->profile_picture,
+            'city' => $this->city,
+            'about_me' => $this->about_me,
+            'statistics' => ['wins' => $this->wins, 'defeats' => $this->defeats],
+            'rapper' => $this->rapper
+        ];
+    }
+
+    /**
+     * Get the settings of the user.
+     *
+     * @return array
+     */
+    public function settings()
+    {
+        return [
+            'rapper' => $this->rapper,
+            'notifications' => $this->notifications
         ];
     }
 

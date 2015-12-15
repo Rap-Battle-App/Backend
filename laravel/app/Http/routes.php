@@ -81,6 +81,10 @@ Route::group(['middleware' => 'auth'], function() {
     /**
      * Data Access Routes
      */
-    Route::get('picture/{id}', ['as' => 'data.picture', 'uses' => 'DataAccessController@getPicture']);
-    Route::get('video/{id}', ['as' => 'data.video', 'uses' => 'DataAccessController@getVideo']);
+    Route::get('picture/{file}', ['as' => 'data.picture', 'uses' => 'DataAccessController@getPicture']);
+    Route::get('video/{file}', ['as' => 'data.video', 'uses' => 'DataAccessController@getVideo']);
+    /**
+     * Push Notification Routes
+     */
+    Route::post('device-token', 'PushNotificationController@postToken');
 });
