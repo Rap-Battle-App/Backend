@@ -146,7 +146,7 @@ class User extends Model implements AuthenticatableContract,
      */
     public function scopeRatedBetween($query, $min, $max)
     {
-        $this->updateRating();
+        //$this->updateRating();
         return $query->where('rating', '>=', $min)->where('rating', '<=', $max);
     }
 
