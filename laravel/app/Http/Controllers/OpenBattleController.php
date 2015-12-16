@@ -12,10 +12,23 @@ use Storage;
 
 class OpenBattleController extends Controller
 {
+    /*
+    |--------------------------------------------------------------------------
+    | open Battle Controller
+    |--------------------------------------------------------------------------
+    |
+    | This controller is responsible for handling the data of the open battles
+    | and closing the entry, processing video and adding the final result of 
+    | battle to the battle table
+    |
+    */
+
     /**
-     * Display a listing of the resource.
+     * Handle a search request and return the open battle which is required to be
+     * updated.
      *
-     * @return \Illuminate\Http\Response
+     * @param  \Illumnate\Http\Request  Id
+     * @return \Illuminate\Http\JsonResponse
      */
 
 
@@ -29,15 +42,14 @@ class OpenBattleController extends Controller
             $user_id = Auth::user()->id;
             $battle = App\open_battles::findOrFail($id);
            
-            if($user_id == $battle->rapper2_id) 
+            if($user_id == $battle->rapper1_id) 
                 $profile = App\User::findOrFail($battle->rapper2_id);
             else
                 $profile = App\User::findOrFail($battle->rapper1_id);
 
-            $profileView = array();
-            $profileView->user_id = $profile->id;
-            $profileView->username= $profile->name;
-            $profileView->profile_picture = $profile->picture;
+            $profiles = $profile->map(function($profile, $key) {              //check please
+            return $profile->profilePreview();
+        });
 
             $phase1Info = array();
             $phase1Info->round1_url = $battle->rapper1_round1;
@@ -50,19 +62,33 @@ class OpenBattleController extends Controller
 
 
             $phaseInfo = array();
-            $profileView->time_left = $battle->phase_start;      //need some work here // is it finished ? O.o
+            $phaseInfo->time_left = (24*60*60)-$battle->phase_start;      //need some work here // is it finished ? O.o  //don't know the lenght of round
+                                                                 //assuming it to 24 hours
+
             $phaseInfo->phase1Info = $phase1Info;
             $phaseInfo->phase2Info = $phase2Info;
 
             $openBattle = array();
             $openBattle->id = $battle->id; 
-            $openBattle->opponent = $profileView;
+            $openBattle->opponent = $profiles;            
             $openBattle->phase = $battle->phase;
             $openBattle->info= $phaseInfo;
 
-            return $openBattle;
+            return response()->json(['openBattles' => $openBattles]);           
         
     }
+
+
+    /**
+     * Handle a posted round functionalilites.
+     * Checks the phase of round upload the beat according to the phase
+     * Checks the user, and according uploads the video in the filesystem
+     * If all the videos are there, calls the video concatenation function and uploads the  
+     * openBattle entry with the final video to the battle table and closes the entry here
+     *
+     * @param  \Illumnate\Http\Request  Beat_id
+     * @param  \Illumnate\Http\Request  Video
+     */
     public function postRound(Request $request , $id)
     {
         $validator = Validator::make($request->all(), [
@@ -72,25 +98,33 @@ class OpenBattleController extends Controller
 
         
            $id = Auth::user()->id;
-           $out_link = '/path/to/outputvideo.mp4';
-           $in_link = '/path/to/inputvideo1';
+           $out_link =  OpenBattleController::moveVideoFile($request->video);
+           //$in_link = '/path/to/inputvideo1';
            
-           $event = new App\Events\VideoWasUploaded($out_link, [$in_link]);
+           $event = new App\Events\VideoWasUploaded($out_link, [$out_link]);      //because video will be converted in the filesystem
+                                                                                  // and replaced there only after conversion
+
            Event::fire($event);
 
           
+          // Phase system
+          // 1 - 4
+          // 1 means 1 video in file system
+          // 4 means 4 videos in filesystem, time to concatenate and move 
 
            $op_battle = OpenBattle::findOrFail($id);            
            $battleRound = array();
-           if($op_battle->phase == 1)
+           if($op_battle->phase < 2 && $op_battle->phase > 0)
            {
               $op_battle->beat1_id = $request->beat_id;
               if($op_battle->rapper1_round1 == NULL)
                   $op_battle->rapper1_round1 = $out_link;
               else
-                  $op_battle->rapper2_round1 = $out_link; 
+                  $op_battle->rapper2_round1 = $out_link;
+
+              $op_battle->phase++;      //phase changed
            }
-           else
+           else if($op_battle->phase < 4)
            {
               $op_battle->beat2_id = $request->beat_id;
 
@@ -98,27 +132,37 @@ class OpenBattleController extends Controller
                   $op_battle->rapper1_round2 = $out_link;
               else
                   $op_battle->rapper2_round2 = $out_link;
+
+              $op_battle->phase++;      //phase changed  
            }
-           $op_battle->phase++;
-           
-           if($op_battle->phase == 3)   //both rounds are done and needs to close this open_battle entry and 
+           $op_battle->save();
+           if($op_battle->phase == 4)   //both rounds are done and needs to close this open_battle entry and 
                                         //concatenate the video and add the final result to the battle table
            {
               $battle = new Battle;
               $battle->rapper1_id = $op_battle->rapper1_id;
               $battle->rapper2_id = $op_battle->rapper2_id;
-              //concatenating video
-              $event = new App\Events\VideoWasUploaded($out_link, [$in_link]);
+
+              //converted and concatenated all the videos in the place of first video
+              $event = new App\Events\VideoWasUploaded($rapper1_round1, [$rapper1_round1 , $rapper2_round1 , $rapper1_round2 , $rapper2_round2]);
               Event::fire($event);
-              //uploading video
-              $link = upload;
-              //final link
-              $battle->video = $link;
+
+              //link to the concatenated file given to video in the battle table
+
+              $battle->video = $rapper1_round1;
               $battle->votes_rapper1 = 0;
               $battle->votes_rapper2 = 0;
+
+              //new entry in the battle created
+
+              $battle->save();
+              
+              //entry from the open battle removed
+
+              $op_battle->delete();
            }
            
-           $op_battle->save();
+           
         
     }
    
