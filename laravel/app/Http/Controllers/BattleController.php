@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Auth;
 use App\Models\Battle;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Models\OpenBattle;
@@ -19,54 +20,57 @@ class BattleController extends Controller
     //return a single Battle Object identified by id
     public function getBattle($id) 
     {	
-        //can't just return battle as json - need to construct ProfilePreviews for rappers and Voting (see API Diagramm)
-        // use map
-        //return response()->json(Battle::findOrFail($id));
 
-	/*
-		$collection = collect([1, 2, 3, 4, 5]);
+            
+        $battleInfo = Battle::findOrFail($id);
 
-		$multiplied = $collection->map(function ($item, $key) {
-			return $item * 2;
-		});
+        $profilePreview1 = array();
+        $profilePreview1->user_id = $battleInfo->rapper1_id; //Erreor: Attempt to assign property of non-object
+        $profilePreview1->username = User::findOrFail($battleInfo->rapper1_id)->username;
+        $profilePreview1->profile_picture = User::findOrFail($battleInfo->rapper1_id)->picture;
+        
 
-		$multiplied->all();
+        $profilePreview2 = array();
+        $profilePreview2->user_id = $battleInfo->rapper2_id;
+        $profilePreview2->username = getUser($battleInfo->rapper2_id)->name;
+        $profilePreview2->profile_picture = getProfile($battleInfo->rapper2_id)->profile_picture;
 
-	// [2, 4, 6, 8, 10]
-	*/
+        $voting = array();
+        $voting->votes_rapper1 = $battleInfo->votes_rapper1;
+        $voting->votes_rapper2 = $battleInfo->votes_rapper2;
+        $voting->voted_for = ""; //what???
 
-    /*
-        //json request returrns array
-        $collection = collect(response()->json(Battle::findOrFail($id)));
 
-        $format = $collection->map(function ($item, $key) {
-            if($item=='rapper1_id')
-            {
-                return 'rapper1'=> getProfile($item);
-            }
-            if($item=='rapper2_id')
-            {
-                return 'rapper2'=> getProfile($item);
-            }
-            if($item=='votes_rapper1')
-            {
-                return Voting; //?
-            }
-            if($item=='votes_rapper2')
-            {
-                return;
-            }
-            return $item * 2;
-        });
+        //thats what I call a dirty hack ;)
 
-		$format->all();
+        $openOrNot = true;
+        try{
+            getOpenBattle($id);
+        }
+        catch(ModelNotFoundException $e){
+            $openOrNot = false;
+        }
 
-	// [2, 4, 6, 8, 10]
-	*/
+        
+        $voting->open = $openOrNot;
 
 
 
-        return Battle::findOrFail($id);
+        $battle = array();
+        $battle->id = $battleInfo->id;
+        $battle->video_url = $battleInfo->video;
+        $battle->rapper1 = $profilePreview1;
+        $battle->rapper2 = $profilePreview2;
+        $battle->voting = $voting;
+        
+        
+            
+
+        return $battle;
+        
+    
+
+        //return Battle::findOrFail($id);
     }
 	
     //return an Array of Battles with the most votes

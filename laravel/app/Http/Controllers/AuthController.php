@@ -59,10 +59,10 @@ class AuthController extends Controller
     * Return the users ID after successful authentication.
     *
     * @param  \Illuminate\Http\Request  $request
-    * @param  \App\Modles\User  $user
+    * @param  \App\Models\User  $user
     * @return \Illuminate\Http\JsonResponse
     */
-    protected function authenticated(Request $request, User $user)
+    protected function authenticated(Request $request, $user)
     {
         return response()->json(['user_id' => $user->id]);
     }
