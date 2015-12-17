@@ -220,10 +220,10 @@ class User extends Model implements AuthenticatableContract,
      */
     public function updateRating()
     {
-        //not yet tested
+        $completed = User::battles()->completed()->get();
 
         foreach($completed as $battle){
-            if($this->battle()->rapper1_id == $this->id)
+            if($battle->rapper1_id == $this->id)
             {
                 $this->wins=$this->battle()->where(votes_rapper1>votes_rapper2);
                 $this->defeats=$this->battle()->where(votes_rapper1<votes_rapper2);
@@ -237,6 +237,6 @@ class User extends Model implements AuthenticatableContract,
             }
 
         }
-        $this->save;
+        $this->save();
     }
 }
