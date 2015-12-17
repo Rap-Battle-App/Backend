@@ -221,22 +221,26 @@ class User extends Model implements AuthenticatableContract,
     public function updateRating()
     {
         $completed = User::battles()->completed()->get();
+        $this->wins = 0;
+        $this->defeats = 0;
 
         foreach($completed as $battle){
-            if($battle->rapper1_id == $this->id)
-            {
-                $this->wins=$this->battle()->where(votes_rapper1>votes_rapper2);
-                $this->defeats=$this->battle()->where(votes_rapper1<votes_rapper2);
-                $this->rating=$this->wins*3+$this->defeats;
+            if($battle->votes_rapper1 > $battle->votes_rapper2){
+                if($battle->rapper1_id == $this->id){
+                    $this->wins += 1;
+                } else {
+                    $this->defeats += 1;
+                }
+            } else if($battle->votes_rapper1 < $battle->votes_rapper2){
+                if($battle->rapper1_id == $this->id){
+                    $this->defeats += 1;
+                } else {
+                    $this->wins += 1;
+                }
             }
-            else
-            {
-                $this->wins=$this->battle()->where(votes_rapper2>votes_rapper1);
-                $this->defeats=$this->battle()->where(votes_rapper2<votes_rapper1);
-                $this->rating=$this->wins*3+$this->defeats;
-            }
-
         }
+
+        $this->rating = $this->wins * 3 + $this->defeats;
         $this->save();
     }
 }

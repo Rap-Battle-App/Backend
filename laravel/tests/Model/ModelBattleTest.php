@@ -146,13 +146,13 @@ class ModelBattleTest extends TestCase
         // test scopeOpenVoting
         // get battles from database
         $openBattles = Battle::openVoting()->get()->values()->keyBy('id');
-        $this->assertNotNull($openBattles->get($battle1->id));
-        $this->assertNull($openBattles->get($battle2->id));
+        $this->assertTrue($openBattles->has($battle1->id));
+        $this->assertFalse($openBattles->has($battle2->id));
 
         // test scopeCompleted
         // get battles from database
         $completedBattles = Battle::completed()->get()->values()->keyBy('id');
-        $this->assertNull($completedBattles->get($battle1->id));
-        $this->assertNotNull($completedBattles->get($battle2->id));
+        $this->assertFalse($completedBattles->has($battle1->id));
+        $this->assertTrue($completedBattles->has($battle2->id));
     }
 }

@@ -71,6 +71,8 @@ class DatabaseSeeder extends Seeder
 
             // save vote count in battle
             $battle->save();
+            $battle->rapper1->updateRating();
+            $battle->rapper2->updateRating();
         }
 
         //----------------------------------------------
