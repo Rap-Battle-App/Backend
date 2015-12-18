@@ -18,9 +18,11 @@ class UserController extends Controller
 
     public function getProfile(Request $id)
     {
-        $this->validate = Validator::make($request->all(), [
-            'id' => 'required|integer|unique:posts|max:10'
-        ]);
+        //for some reason the validator returns strange errors
+
+        //$this->validate = Validator::make($request->all(), [
+        //    'id' => 'required|integer|unique:posts|max:10'
+        //]);
 
             
             $user = User::findOrFail($id);
