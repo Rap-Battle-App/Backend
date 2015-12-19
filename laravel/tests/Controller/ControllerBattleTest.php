@@ -38,7 +38,7 @@ class ControllerBattleTest extends TestCase
         $battle->votes_rapper1 = 45;
         $battle->votes_rapper2 = 86;
         $battle->save();
-        echo $battle->id;
+        //echo $battle->id;
 
 
 
@@ -58,7 +58,9 @@ class ControllerBattleTest extends TestCase
                 'votes_rapper1' => 45,
                 'votes_rapper2' => 86
              ]);
-    */
+        */
+        // TODO: remove this after finishing the test above:
+        $this->markTestIncomplete();
     }
 	
     
