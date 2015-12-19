@@ -26,7 +26,6 @@ class DataAccessController extends Controller
     {
         $disk = Storage::disk('avatars');
         $picture = $disk->get($file);
-        // Needs PHP Fileinfo extension
         $type = $disk->getMimetype($file);
         return response($picture)->header('Content-Type', $type);
     }
@@ -41,7 +40,6 @@ class DataAccessController extends Controller
     {
         $disk = Storage::disk('videos');
         $video = $disk->get($file);
-        // Needs PHP Fileinfo extension
         $type = $disk->getMimetype($file);
         return response($video)->header('Content-Type', $type);
     }
