@@ -3,148 +3,152 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\User;
-use App\Http\Requests;
-use App\Http\Controllers\Controller;
+use Auth;
+use Storage;
+use Hash;
+use App\Models\User;
 
 class UserController extends Controller
 {
+    /*
+    |--------------------------------------------------------------------------
+    | User Controller
+    |--------------------------------------------------------------------------
+    |
+    | This controller is responsible for returning information about a single
+    | user and handling requests to change that information.
+    |
+    */
+
     /**
-     * Display a listing of the resource.
+     * Get a users profile.
      *
-     * @return \Illuminate\Http\Response
+     * @param  integer  $id
+     * @return array
      */
-
-
-    public function getProfile(Request $id)
+    public function getProfile($id)
     {
-        //for some reason the validator returns strange errors
-
-        //$this->validate = Validator::make($request->all(), [
-        //    'id' => 'required|integer|unique:posts|max:10'
-        //]);
-
-            
-            $user = User::findOrFail($id);
-
-            $battleStatistics = array();
-            $battleStatistics->wins = $user->wins;
-            $battleStatistics->defeats = $user->defeats;
-
-            $profile = array();
-            $profile->id = $user->id;
-            $profile->username = $user->name;
-            $profile->profile_picture = $user->picture;
-            $profile->city = $user->city;
-            $profile->about_me = $user->about_me;
-            $profile->statisctics = $battleStatistics;
-            $profile->rapper = $user->rapper;
-            
-
-            return $profile;
-        
+        $user = User::findOrFail($id);
+        return $user->profile();
     }
 
+    /**
+     * Change the authenticated users profile information.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return void
+     */
     public function postProfileInformation(Request $request)
     {
-        $this->validate = Validator::make($request->all(), [
-            'city' => /*required|*/'string|max:255',       // just made is as a comment now so in case it is needed it can be uncommented fast.
-            'about_me' => /*required|*/'string|max:512'
+        $this->validate($request, [
+            'city' => 'string|max:255',
+            'about_me' => 'string'
         ]);
 
-        
-            /*$id = Auth::user()->id;
-            $user = findOrFail($id);*/
-            $user = $request->user();
+        $user = $request->user();
 
-            $user->city = $request->city;
-            $user->about_me = $request->about_me;
-           
-            $user->save();
-        
+        $user->city = $request->input('city');
+        $user->about_me = $request->input('about_me');
+
+        $user->save();
     }
 
+    /**
+     * Change the authenticated users profile picture.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return void
+     */
     public function postProfilePicture(Request $request)
     {
-        $this->validate = Validator::make($request->all(), [
-            'picture' => /*required*/'|byte'
+        $this->validate($request, [
+            'picture' => 'required|image'
         ]);
 
-        
-            /*$id = Auth::user()->id;
-            $user = findOrFail($id);*/
-            $user = $request->user();
+        $user = $request->user();
 
-            $user->picture = $request->picture;        
+        // Save the picture to the backend storage.
+        $picture = $request->file('picture');
+        $picture_id = $user->id.'.'.$picture->guessExtension();
+        Storage::disk('avatars')->put($picture_id, file_get_contents($picture->getRealPath()));
 
-            $user->save();
-        
+        $user->picture = $picture_id;
+
+        $user->save();
     }
+
+    /**
+     * Get the authenticated users settings.
+     *
+     * @return array
+     */
     public function getSettings()
     {
-        
-            $id = Auth::user()->id;
-
-            $user = findOrFail($id);
-            $settings = array();
-            $settings->rapper = $user->rapper;
-            $settings->notifications= $user->notifications;
-
-            return $settings;
-        
+        $user = Auth::user();
+        return $user->settings();
     }
+
+    /**
+     * Change the authenticated users settings.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return void
+     */
     public function postSettings(Request $request)
     {
-        $this->validate = Validator::make($request->all(), [
+        $this->validate($request, [
             'rapper' => 'required|boolean',
             'notifications' => 'required|boolean'
         ]);
 
-        
-            
-            /*$id = Auth::user()->id;
-            $user = findOrFail($id);*/
-            $user = $request->user();
-            $user->rapper = $request->rapper; 
-            $user->notifications = $request->notifications;
-            $user->save();
-            
-        
+        $user = $request->user();
+
+        $user->rapper = $request->input('rapper');
+        $user->notifications = $request->input('notifications');
+
+        $user->save();
     }
+
+    /**
+     * Change the authenticated users username.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return void
+     */
     public function postUsername(Request $request)
     {
-        $this->validate = Validator::make($request->all(), [
-            'rapper' => 'required|bit',
-            'notifications' => 'required|bit'
+        $this->validate($request, [
+            'username' => 'required|string|unique:users'
         ]);
 
-        
-            /*$id = Auth::user()->id;
-            $user = findOrFail($id);*/
-            $user = $request->user();
+        $user = $request->user();
 
-            $user->name = $request->username;        
+        $user->username = $request->input('username');
 
-            $user->save();
-        
+        $user->save();
     }
+
+    /**
+     * Change the authenticated users password.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return mixed
+     */
     public function postPassword(Request $request)
     {
-        $this->validate = Validator::make($request->all(), [
-            'old_password' => 'required|string|min:6',       //
+        $this->validate($request, [
+            'old_password' => 'required|string',
             'password' => 'required|string|min:6'
         ]);
 
-            $options = array('cost' => 15);
-            /*$id = Auth::user()->id;
-            $user = findOrFail($id);*/
-            $user = $request->user();
-            $request->old_password = password_hash($request->old_password,PASSWORD_BCRYPT,$options);//old --> Hash::make($request->old_password);       
-            if($request->old_password == $user->password){
-                $user->password = password_hash($request->password,PASSWORD_BCRYPT,$options); // old --> Hash::make($request->password);
-                $user->save();        
-            }
-           
-        
+        $user = $request->user();
+
+        if (Hash::check($request->input('old_password'), $user->password)) {
+            $user->password = bcrypt($request->input('password'));
+
+            $user->save();
+        } else {
+            return response()->json(['old_password' => [trans('passwords.passwords-not-matching')]], 422);
+        }
     }
 }
