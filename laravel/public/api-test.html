@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset="utf8"/>
-        <title>API Test v0.1</title>
+        <title>API Test v0.2</title>
         <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
         <script type="text/javascript">
             var xhr;
@@ -39,15 +39,32 @@
             $(document).ready(function() {
                 $('#error').hide();
                 $('#response').hide();
-                $('#submit').click(function(e) {
+                $('#request-form').submit(function(e) {
                     e.preventDefault();
                     try {
-                        if($('#request-form #method').val() == 'get') {
-                            $.get('http://localhost/' + $('#request-form #route').val(), JSON.parse('{' + $('#request-form #parameters').val() + '}'));
-                        } else {
-                            $.post('http://localhost/' + $('#request-form #route').val(), JSON.parse('{' + $('#request-form #parameters').val() + '}'));
+                        var fd = new FormData($(this)[0]);
+                        var parameters = JSON.parse('{' + $('#request-form #parameters').val() + '}');
+                        if($('#requets-form #file').val() != '') {
+                            var name = $('#request-form #file-parameter').val();
+                            if(name) {
+                                fd.set(name, fd.get('file'));
+                                fd.delete('file');
+                            }
                         }
+                        for(var name in parameters) {
+                            fd.set(name, parameters[name]);
+                        }
+                        $.ajax({
+                            url: 'http://localhost/' + ($('#request-form #route').val() ? $('#request-form #route').val() : ''),
+                            type: $('#request-form #method').val(),
+                            data: fd,
+                            async: false,
+                            cache: false,
+                            contentType: false,
+                            processData: false
+                        });
                     } catch(e) {
+                        console.log(e);
                         $('#error #message').html(e.message);
                         $('#response').hide();
                         $('#error').show();
@@ -64,6 +81,7 @@
             </select>
             <label>to http://localhost/</label><input id="route" type="text" placeholder="your/route/here" \><br/>
             <label>Parameters (JSON): {</label><br/><textarea id="parameters" rows="10" cols="50" placeholder="&#34;example&#34;: &#34;value&#34;, &#34;integer_value&#34;: 1"></textarea><br/><label>}</label><br/>
+            <label>File - Parameter Name: </label><input type="text" id="file-parameter" placeholder="e.g. picture"/><input name="file" id="file" type="file"/><br/>
             <button id="submit" type="submit">Send</button>
         </form>
         <div id="error">Error: <span id="message"></span></div>
