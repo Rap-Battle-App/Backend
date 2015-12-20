@@ -26,9 +26,9 @@ class PushNotificationControllerTest extends TestCase
     {
         //$this->withoutMiddleware();
         $user = factory(App\Models\User::class)->create();
-        $user->save();
+        
 
-        echo $user->device_token;
+        //echo $user->device_token;
 
 
 
