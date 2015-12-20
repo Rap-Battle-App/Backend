@@ -7,7 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
-class ControllerBattleTest extends TestCase
+class ControllerPasswordTest extends TestCase
 {
     use WithoutMiddleware;
 
