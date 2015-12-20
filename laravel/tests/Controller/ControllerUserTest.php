@@ -26,12 +26,12 @@ class ControllerUserTest extends TestCase
     {
         //$this->withoutMiddleware();
         $user = factory(App\Models\User::class)->create(['rating' => 3]);
-        $user->save();
+        //$user->save();
 
 
-        echo $user->rating;
-        echo $user->username;
-        echo $user->id;
+        //echo $user->rating;
+        //echo $user->username;
+        //echo $user->id;
 
 
 
@@ -50,10 +50,10 @@ class ControllerUserTest extends TestCase
         // create users
         $user1 = factory(App\Models\User::class)->create();
         $user2 = factory(App\Models\User::class)->create();
-        $user1->save();
-        $user2->save();
-        echo $user1->city;
-        echo $user2->about_me;
+       // $user1->save();
+       // $user2->save();
+        //echo $user1->city;
+       // echo $user2->about_me;
         //may need to send the user number.
         $this->post('/profile', ['city' => $user2->city , 'about_me' => $user2->about_me]);
 
@@ -79,9 +79,8 @@ class ControllerUserTest extends TestCase
     {
         $user = factory(App\Models\User::class)->create();
         
-        $user->save();
-        echo $user->rapper;
-        echo $user->notifications;
+        //echo $user->rapper;
+        //echo $user->notifications;
 
         $this->get('/account/settings');
 
@@ -95,9 +94,8 @@ class ControllerUserTest extends TestCase
     public function testPostSettings()
     {
         $user = factory(App\Models\User::class)->create();
-        $user->save();
-        echo $user->rapper;
-        echo $user->notifications;
+        //echo $user->rapper;
+        //echo $user->notifications;
 
         $this->post('/account/settings', ['rapper' => TRUE , 'notifications' => FALSE ]);
         
@@ -110,13 +108,12 @@ class ControllerUserTest extends TestCase
     public function testGetUsername()
     {
         $user = factory(App\Models\User::class)->create(['username' => 'smithjones']);
-        $user->save();
-        echo $user->username;
+        //echo $user->username;
 
 
 
 
-        $this->get('/account/useranme', ['id' => $user->id]);
+        $this->get('/account/username', ['id' => $user->id]);
 
         
         $this->assertEquals('smithjones', $user->username);
@@ -128,12 +125,12 @@ class ControllerUserTest extends TestCase
     public function testPostUsername()
     {
         $user = factory(App\Models\User::class)->create(['username' => 'smies']);
-        $user->save();
-        echo $user->username;
+
+        //echo $user->username;
         
 
 
-        $this->post('/account/useranme', ['username' => 'testuser']);
+        $this->post('/account/username', ['username' => 'testuser']);
 
         //checking the updation
         $this->assertEquals('testuser', $user->username);
@@ -146,9 +143,8 @@ class ControllerUserTest extends TestCase
     public function testPostPassword()
     {
         $user = factory(App\Models\User::class)->create();
-        $user->save();
 
-        echo $user->password;
+        //echo $user->password;
 
         $options = array('cost' => 15);
         $new_password = 'roxtar';
@@ -156,9 +152,7 @@ class ControllerUserTest extends TestCase
 
         //checking updated password after hashing
         $this->assertEquals($user->password, password_hash($new_password,PASSWORD_BCRYPT,$options));
-        
-
-             
+            
     }   	
 
 }
