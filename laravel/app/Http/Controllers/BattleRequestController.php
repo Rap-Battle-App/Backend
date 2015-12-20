@@ -3,12 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\User;
-use App\open_battles;
-use App\battles;
-use App\battles_requests;
-use App\Http\Requests;
-use App\Http\Controllers\Controller;
+use Auth;
+use Log;
+use App\Models\User;
+use App\Models\BattleRequest;
+use App\Models\OpenBattle;
 
 class BattleRequestController extends Controller
 {
@@ -17,119 +16,143 @@ class BattleRequestController extends Controller
     | Battle Request Controller
     |--------------------------------------------------------------------------
     |
-    | This controller is responsible for handling requests of different rappers
-    | and getting challenges and provoke challenges, random opponents.
-    | basically regarding provoking battles.
+    | This controller is responsible for handling search requests and returns
+    | a list of all matching users.
     |
     */
 
     /**
-     * Handle a get Request demand, returns all the challengers to the Rapper
+     * Get all requests by and to the authenticated user.
      *
      * @return \Illuminate\Http\JsonResponse
      */
-
-
     public function getRequests()
     {
-        $main_user = Auth::user()->user_id;
-        $challengers = App::table('battles_requests')->where('challenged_id', $main_user)->get();
-        
-        $profiles = $challengers->map(function($challengers, $key) {
-            return $challengers->profilePreview();
-        });
-        //$requests = $Requests;
-        //$opponent_requests = $Requests
+        $user = Auth::user();
 
-        return response()->json(['requests' => $profiles , 'opponent_requests' => $profiles]);
-        
+        $requests = $user->battleRequestsChallenger()->get();
+        $requestsOpponent = $user->battleRequestsChallenged()->get();
+
+        $requests = $requests->map(function($request, $key) {
+            return $request->toJSON_Challenger();
+        });
+        $requestsOpponent = $requestsOpponent->map(function($request, $key) {
+            return $request->toJSON_Challenged();
+        });
+
+        return response()->json(['requests' => $requests, 'requests_opponent' => $requestsOpponent]);
     }
 
-
     /**
-     * Handle a challenge opponent request, create a new challenge in the requests table
-     * with his id and opponent id 
+     * Send a battle request to a user.
      *
-     * @param  \Illumnate\Http\Request  user_id
-     * @return void
+     * @param  \Illuminate\Http\Request  $request
+     * @return void|\Illuminate\Http\JsonResponse
      */
-    public function postRequests(Request $request)
+    public function postRequest(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $this->validate($request, [
             'user_id' => 'required|integer'
         ]);
 
-        
-           $battles_requests = new battles_requests;  
+        $opponent = User::findOrFail($request->input('user_id'));
 
-           $new_request->challenger_id = Auth::user()->user_id;
-           $new_request->challenged_id = $request->user_id;         
-           
-           $battles_requests->save();
-        
+        $user = $request->user();
+
+        if (!$opponent->rapper) {
+            return response()->json(['user_id' => [trans('rap-battle.no-rapper')]], 422);
+        }
+        if ($opponent->hasBattleRequestAgainst($user)) {
+            return response()->json(['user_id' => [trans('rap-battle.request-already-exists')]], 422);
+        }
+        if ($opponent->hasOpenBattleAgainst($user)) {
+            return response()->json(['user_id' => [trans('rap-battle.battle-already-exists')]], 422);
+        }
+
+        $battleRequest = new BattleRequest;
+
+        $battleRequest->challenger()->associate($user);
+        $battleRequest->challenged()->associate($opponent);
+
+        $battleRequest->save();
     }
 
-
     /**
-     * Handle a battle request responses, if both agree, open a new entry in the OpenBattle table
-     * otherwise, simply removes the entry from the battle requests table
+     * Accept or decline a battle request.
      *
-     * @param  \Illumnate\Http\id   [battle request table]
-     * @param  \Illumnate\Http\Request  accepted   
-     * @return void
+     * @param  \Illuminate\Http\Request  $request
+     * @param  integer  $id
+     * @return void|\Illuminate\Http\Response
      */
-    public function postAnswer(Request $request , $id)
+    public function postAnswer(Request $request, $id)
     {
-        $validator = Validator::make($request->all(), [
+        $this->validate($request, [
             'accepted' => 'required|boolean'
         ]);
 
-           $battle = battles_requests::findOrFail($id);
-           //accepted response opens a new battle and removes the request from the battle request table
-           if($request->accepted == TRUE){
-            
-            $op_battle = new open_battles;
-            $op_battle->rapper1_id = $battle->challenger_id;
-            $op_battle->rapper2_id = $battle->challenged_id;
-            $op_battle->phase = 0;
-            $op_battle->beat1_id = 0;
-            $op_battle->rapper1_round1 = NULL;
-            $op_battle->rapper2_round1 = NULL;
-            $op_battle->beat2_id = 0;
-            $op_battle->rapper1_round2 = NULL;
-            $op_battle->rapper2_round2 = NULL;
-            $op_battle->save();
-           }
-           
-           //deletes the entry from the battel request table, whatever the response is         
-           $battle->save();
-        
+        $battleRequest = BattleRequest::findOrFail($id);
+
+        // Check if authenticated user is challenged user
+        if ($battleRequest->challenged == $request->user()) {
+            if ($request->input('accepted')) {
+                $battle = new OpenBattle;
+                $battle->start($battleRequest->challenger, $battleRequest->challenged);
+                $battle->save();
+            }
+            $battleRequest->delete();
+        } else {
+            return response('Unauthorized.', 401);
+        }
     }
 
-
     /**
-     * Handles the request for the random opponent demand,
-     * returns a random opponent accoring to the ranking of the challenger  
+     * Find a random opponent for the authenticated user based on rating.
      *
-     * @param  void
      * @return \Illuminate\Http\JsonResponse
      */
     public function getRandomOpponent()
     {
-           $user = Auth::user()->user_id;       
-           $rand_coll = App::table('User')->whereBetween('ratings', array(($user->ratings) - 1 , ($user->ratings) + 1 ))->get();    //assumed the scale of 0-10 and selected the oppenents from +- 1 range
+        $user = Auth::user();
+        // Number of possible opponents = Number of rappers - 1 (Authenticated user)
+        //     - Number of open battles of authenticated user
+        //     - Number of battle requests of authenticated user
+        $possibleOpponentCount = User::rapper()->count() - 1 - $user->openBattles()->count() - $user->battleRequests()->count();
 
-           $profile = $rand_coll->random()->first();      //selected one from the random collection
-           
-           $profiles = $profile->map(function($profile, $key) {
-            return $profile->profilePreview();
-           });
-            
-          return response()->json(['opponent' => $profiles]);
-        
+        $opponent = null;
+
+        // This is faster because there are no unecessary iterations.
+        if ($possibleOpponentCount == 1) {
+            // There is only one possible opponent.
+            $opponent = User::validOpponentFor($user)->first();
+        } elseif ($possibleOpponentCount > 1) {
+            // Increase the search range exponentially to make sure an opponent is found.
+            $exponentialBase = 2;
+            $rating = $user->rating;
+            for ($i = 0; is_null($opponent); $i++) {
+                $range = $exponentialBase ** $i;
+                $minRating = $rating - $range;
+                $maxRating = $rating + $range;
+
+                $possibleOpponents = User::validOpponentFor($user)->ratedBetween($minRating, $maxRating)->get();
+                if (!$possibleOpponents->isEmpty()) {
+                    $opponent = $possibleOpponents->random();
+                    // Log for later optimizing
+                    Log::info('Random opponent found.', ['possible opponents' => $possibleOpponentCount, 'exponential base' => $exponentialBase, 'iterations' => $i]);
+                }
+            }
+        }
+
+        if (!is_null($opponent)) {
+            $battleRequest = new BattleRequest;
+
+            $battleRequest->challenger()->associate($user);
+            $battleRequest->challenged()->associate($opponent);
+
+            $battleRequest->save();
+
+            $opponent = $opponent->profilePreview();
+        }
+
+        return response()->json(['opponent' => $opponent]);
     }
-
-    
-    
-    
 }

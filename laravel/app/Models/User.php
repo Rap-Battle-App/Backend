@@ -9,7 +9,7 @@ use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
-use App\Http\Controllers\BattleController;
+use DB;
 
 
 class User extends Model implements AuthenticatableContract,
@@ -42,6 +42,11 @@ class User extends Model implements AuthenticatableContract,
         'notifications' => 'boolean'
     ];
 
+    /**
+     * Get route to the users profile picture.
+     *
+     * @return null|string
+     */
     public function getProfilePictureAttribute()
     {
         return is_null($this->attributes['picture']) ? null : route('data.picture', ['file' => $this->attributes['picture']]);
@@ -147,7 +152,44 @@ class User extends Model implements AuthenticatableContract,
     public function scopeRatedBetween($query, $min, $max)
     {
         //$this->updateRating();
-        return $query->where('rating', '>=', $min)->where('rating', '<=', $max);
+        return $query->whereBetween('rating', [$min, $max]);
+    }
+
+    /**
+     *
+     */
+    public function scopeNot($query, User $user)
+    {
+        return $query->where('id', '<>', $user->id);
+    }
+
+    /**
+     *
+     */
+    public function scopeNoOpenBattleAgainst($query, User $user)
+    {
+        // TODO
+        return $query;
+        /*return $query->whereHasNot('openBattles', function ($query) {
+            $query->where('rapper1', $user->id)->orWhere('rapper2', $user->id);
+        });*/
+    }
+
+    /**
+     *
+     */
+    public function scopeNoBattleRequestsAgainst($query, User $user)
+    {
+        //TODO
+        return $query;
+    }
+
+    /**
+     *
+     */
+    public function scopeValidOpponentFor($query, User $user)
+    {
+        return User::rapper()->not($user)->noOpenBattleAgainst($user)->noBattleRequestsAgainst($user);
     }
 
     /**
@@ -166,6 +208,55 @@ class User extends Model implements AuthenticatableContract,
     public function hasDeviceToken()
     {
         return !is_null($this->device_token);
+    }
+
+    /**
+     *
+     */
+    public function hasBattleRequestAgainst(User $user)
+    {
+        //TODO
+        return true;
+    }
+
+    /**
+     *
+     */
+    public function hasOpenBattleAgainst(User $user)
+    {
+        //TODO
+        return true;
+    }
+
+    /**
+     * update the rating of a user, as well as wins and defeats
+     * at the moment a user gets three points for each won battle
+     * plus one point for each defeat (for participation)
+     */
+    public function updateRating()
+    {
+        $completed = User::battles()->completed()->get();
+        $this->wins = 0;
+        $this->defeats = 0;
+
+        foreach($completed as $battle){
+            if($battle->votes_rapper1 > $battle->votes_rapper2){
+                if($battle->rapper1_id == $this->id){
+                    $this->wins += 1;
+                } else {
+                    $this->defeats += 1;
+                }
+            } else if($battle->votes_rapper1 < $battle->votes_rapper2){
+                if($battle->rapper1_id == $this->id){
+                    $this->defeats += 1;
+                } else {
+                    $this->wins += 1;
+                }
+            }
+        }
+
+        $this->rating = $this->wins * 3 + $this->defeats;
+        $this->save();
     }
 
     /**
@@ -211,36 +302,5 @@ class User extends Model implements AuthenticatableContract,
             'rapper' => $this->rapper,
             'notifications' => $this->notifications
         ];
-    }
-
-    /**
-     * update the rating of a user, as well as wins and defeats
-     * at the moment a user gets three points for each won battle
-     * plus one point for each defeat (for participation)
-     */
-    public function updateRating()
-    {
-        $completed = User::battles()->completed()->get();
-        $this->wins = 0;
-        $this->defeats = 0;
-
-        foreach($completed as $battle){
-            if($battle->votes_rapper1 > $battle->votes_rapper2){
-                if($battle->rapper1_id == $this->id){
-                    $this->wins += 1;
-                } else {
-                    $this->defeats += 1;
-                }
-            } else if($battle->votes_rapper1 < $battle->votes_rapper2){
-                if($battle->rapper1_id == $this->id){
-                    $this->defeats += 1;
-                } else {
-                    $this->wins += 1;
-                }
-            }
-        }
-
-        $this->rating = $this->wins * 3 + $this->defeats;
-        $this->save();
     }
 }
