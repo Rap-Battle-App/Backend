@@ -107,9 +107,33 @@ class User extends Model implements AuthenticatableContract,
      */
     public function battleRequests()
     {
-        $ids_challenger = $this->battleRequestsChallenger()->lists('challenger_id');
-        $ids_challenged = $this->battleRequestsChallenged()->lists('challenged_id');
-        return BattleRequest::whereIn('challenger_id', $ids_challenger)->orWhereIn('challenged_id', $ids_challenged);
+        $ids_challenger = $this->battleRequestsChallenger()->lists('id')->toArray();
+        $ids_challenged = $this->battleRequestsChallenged()->lists('id')->toArray();
+        return BattleRequest::whereIn('id', array_merge($ids_challenger, $ids_challenged));
+    }
+
+    /**
+     * Checks whether a user has a battle request agains $user
+     */
+    public function hasBattleRequestAgainst(User $user)
+    {
+        // possibly naive solution, other one had really ugly bugs
+        $cnt1 = BattleRequest::where('challenger_id', $this->id)->where('challenged_id', $user->id)->count();
+        $cnt2 = BattleRequest::where('challenged_id', $this->id)->where('challenger_id', $user->id)->count();
+        return $cnt1 > 0 || $cnt2 > 0;
+    }
+
+    /**
+     * Get all users who do not have a battle request against $user
+     */
+    public function scopeNoBattleRequestsAgainst($query, User $user)
+    {
+        // get opponents of $user
+        $requests = $user->battleRequests()->get()->values();
+        $challenger = $requests->keyBy('challenger_id')->keys()->unique()->toArray();
+        $challenged = $requests->keyBy('challenged_id')->keys()->unique()->toArray();
+
+        return $query->whereNotIn('id', array_merge($challenger, $challenged));
     }
 
     /**
@@ -133,9 +157,35 @@ class User extends Model implements AuthenticatableContract,
      */
     public function openBattles()
     {
-        $ids_r1 = $this->openBattlesRapper1()->lists('rapper1_id');
-        $ids_r2 = $this->openBattlesRapper2()->lists('rapper2_id');
-        return OpenBattle::whereIn('rapper1_id', $ids_r1)->orWhereIn('rapper2_id', $ids_r2);
+        $ids_rapper1 = $this->openBattlesRapper1()->lists('id')->toArray();
+        $ids_rapper2 = $this->openBattlesRapper2()->lists('id')->toArray();
+        return OpenBattle::whereIn('id', array_merge($ids_rapper1, $ids_rapper2));
+    }
+
+    /**
+     * Check if this user has an open battle $user
+     */
+    public function hasOpenBattleAgainst(User $user)
+    {
+        //$cnt = $this->openBattles()->where('rapper1_id', $user->id)->orWhere('rapper2_id', $user->id)->count();
+        //return $cnt > 0;
+        // possibly naive solution, other one had really ugly bugs
+        $cnt1 = OpenBattle::where('rapper1_id', $this->id)->where('rapper2_id', $user->id)->count();
+        $cnt2 = OpenBattle::where('rapper2_id', $this->id)->where('rapper1_id', $user->id)->count();
+        return $cnt1 > 0 || $cnt2 > 0;
+    }
+
+    /**
+     * Get all users woh $user has no open battle against
+     */
+    public function scopeNoOpenBattleAgainst($query, User $user)
+    {
+        // get opponents of $user
+        $battles = $user->openBattles()->get()->values();
+        $rapper1 = $battles->keyBy('rapper1_id')->keys()->unique()->toArray();
+        $rapper2 = $battles->keyBy('rapper2_id')->keys()->unique()->toArray();
+
+        return $query->whereNotIn('id', array_merge($rapper1, $rapper2));
     }
 
     /**
@@ -156,7 +206,7 @@ class User extends Model implements AuthenticatableContract,
     }
 
     /**
-     *
+     * Get all users except $user
      */
     public function scopeNot($query, User $user)
     {
@@ -164,28 +214,7 @@ class User extends Model implements AuthenticatableContract,
     }
 
     /**
-     *
-     */
-    public function scopeNoOpenBattleAgainst($query, User $user)
-    {
-        // TODO
-        return $query;
-        /*return $query->whereHasNot('openBattles', function ($query) {
-            $query->where('rapper1', $user->id)->orWhere('rapper2', $user->id);
-        });*/
-    }
-
-    /**
-     *
-     */
-    public function scopeNoBattleRequestsAgainst($query, User $user)
-    {
-        //TODO
-        return $query;
-    }
-
-    /**
-     *
+     * Get all rappers who don't have open battles or battle requests to $user
      */
     public function scopeValidOpponentFor($query, User $user)
     {
@@ -208,24 +237,6 @@ class User extends Model implements AuthenticatableContract,
     public function hasDeviceToken()
     {
         return !is_null($this->device_token);
-    }
-
-    /**
-     *
-     */
-    public function hasBattleRequestAgainst(User $user)
-    {
-        //TODO
-        return true;
-    }
-
-    /**
-     *
-     */
-    public function hasOpenBattleAgainst(User $user)
-    {
-        //TODO
-        return true;
     }
 
     /**
@@ -269,7 +280,7 @@ class User extends Model implements AuthenticatableContract,
         return [
             'user_id' => $this->id,
             'username' => $this->username,
-            'profile_picture' => $this->profile_picture
+            'profile_picture' => $this->picture
         ];
     }
 
@@ -283,7 +294,7 @@ class User extends Model implements AuthenticatableContract,
         return [
             'id' => $this->id,
             'username' => $this->username,
-            'profile_picture' => $this->profile_picture,
+            'profile_picture' => $this->picture,
             'city' => $this->city,
             'about_me' => $this->about_me,
             'statistics' => ['wins' => $this->wins, 'defeats' => $this->defeats],

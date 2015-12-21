@@ -88,7 +88,7 @@ class ModelUserTest extends TestCase
         $battle3->save();
        
         // get battles of user2    
-        $battles = $user2->battles()->get()->keyBy('id')->keys()->toArray();
+        $battles = $user2->battles()->lists('id')->toArray();
         $this->assertCount(2, $battles);
         $this->assertContains($battle1->id, $battles);
         $this->assertContains($battle2->id, $battles);
@@ -105,6 +105,7 @@ class ModelUserTest extends TestCase
         $user1 = factory(App\Models\User::class)->create();
         $user2 = factory(App\Models\User::class)->create();
         $user3 = factory(App\Models\User::class)->create();
+        $user4 = factory(App\Models\User::class)->create();
 
         $battleRequest1 = new BattleRequest;
         $battleRequest1->challenger_id = $user1->id;
@@ -122,21 +123,40 @@ class ModelUserTest extends TestCase
         $battleRequest3->save();
         
         // get battle requests of user2    
-        $battleRequests = $user2->battleRequests()->get()->keyBy('id')->keys()->toArray();
+        $battleRequests = $user2->battleRequests()->lists('id')->toArray();
         $this->assertCount(2, $battleRequests);
         $this->assertContains($battleRequest1->id, $battleRequests);
         $this->assertContains($battleRequest2->id, $battleRequests);
         $this->assertNotContains($battleRequest3->id, $battleRequests);
 
         // get battle requests, where user2 is challenger
-        $battleRequestsChallenger = $user2->battleRequestsChallenger()->get()->keyBy('id')->keys()->toArray();
+        $battleRequestsChallenger = $user2->battleRequestsChallenger()->lists('id')->toArray();
         $this->assertCount(1, $battleRequestsChallenger);
         $this->assertContains($battleRequest2->id, $battleRequestsChallenger);
 
         // get battle requests, where user2 is challenged
-        $battleRequestsChallenged = $user2->battleRequestsChallenged()->get()->keyBy('id')->keys()->toArray();
+        $battleRequestsChallenged = $user2->battleRequestsChallenged()->lists('id')->toArray();
         $this->assertCount(1, $battleRequestsChallenged);
         $this->assertContains($battleRequest1->id, $battleRequestsChallenged);
+
+        // get battle requests of user 4 (should be none)
+        $this->assertCount(0, $user4->battleRequests()->lists('id')->toArray()); 
+
+        // tests for hasBattleRequestAgainst()
+        $this->assertTrue($user1->hasBattleRequestAgainst($user2));
+        $this->assertTrue($user1->hasBattleRequestAgainst($user3));
+        $this->assertTrue($user2->hasBattleRequestAgainst($user1));
+        $this->assertTrue($user2->hasBattleRequestAgainst($user3));
+        $this->assertFalse($user1->hasBattleRequestAgainst($user4));
+        $this->assertFalse($user4->hasBattleRequestAgainst($user3));
+
+        // tests for scopeNoBattleRequestsAgainst() 
+        $nbra1 = $user1->noBattleRequestsAgainst($user4)->lists('id')->toArray();
+        $this->assertContains($user4->id, $nbra1);    
+        $nbra4 = $user4->noBattleRequestsAgainst($user4)->lists('id')->toArray();
+        $this->assertContains($user1->id, $nbra4);
+        $this->assertContains($user2->id, $nbra4);
+        $this->assertContains($user3->id, $nbra4);
     }
 
     /**
@@ -149,6 +169,7 @@ class ModelUserTest extends TestCase
         $user1 = factory(App\Models\User::class)->create();
         $user2 = factory(App\Models\User::class)->create();
         $user3 = factory(App\Models\User::class)->create();
+        $user4 = factory(App\Models\User::class)->create();
 
         $battle1 = new OpenBattle;
         $battle1->rapper1_id = $user1->id;
@@ -166,11 +187,27 @@ class ModelUserTest extends TestCase
         $battle3->save();
         
         // get open battles of user2    
-        $battles = $user2->openBattles()->get()->keyBy('id')->keys()->toArray();
+        $battles = $user2->openBattles()->lists('id')->toArray();
         $this->assertCount(2, $battles);
         $this->assertContains($battle1->id, $battles);
         $this->assertContains($battle2->id, $battles);
         $this->assertNotContains($battle3->id, $battles);
+
+        // tests for hasOpenBattleAgainst()
+        $this->assertTrue($user1->hasOpenBattleAgainst($user2));
+        $this->assertTrue($user1->hasOpenBattleAgainst($user3));
+        $this->assertTrue($user2->hasOpenBattleAgainst($user1));
+        $this->assertTrue($user2->hasOpenBattleAgainst($user3));
+        $this->assertFalse($user1->hasOpenBattleAgainst($user4));
+        $this->assertFalse($user4->hasOpenBattleAgainst($user3));
+
+        // tests for scopeNoBattleRequestsAgainst() 
+        $noba1 = $user1->noOpenBattleAgainst($user4)->lists('id')->toArray();
+        $this->assertContains($user4->id, $noba1);
+        $noba4 = $user4->noOpenBattleAgainst($user4)->lists('id')->toArray();
+        $this->assertContains($user1->id, $noba4);
+        $this->assertContains($user2->id, $noba4);
+        $this->assertContains($user3->id, $noba4);
     }
 
     /**
@@ -229,7 +266,7 @@ class ModelUserTest extends TestCase
      */
     public function testGetProfilePictureAttribute()
     {
-
+        // TODO
         $this->markTestIncomplete();
     }
 
