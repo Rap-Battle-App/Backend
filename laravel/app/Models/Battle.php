@@ -86,6 +86,23 @@ class Battle extends Model
     }
 
     /**
+     * Checks whether a battle is open for voting
+     */
+    public function isOpenVoting()
+    {
+        $trendingperiod = config('rap-battle.trendingperiod', 168);
+
+        // battles after this date will be considered for trending
+        $timeoldest = new Carbon();
+        $timeoldest->subHours($trendingperiod);
+
+        // creation date
+        $cre = new Carbon($this->created_at);
+
+        return $cre->gte($timeoldest);
+    }
+
+    /**
      * Scope a query to only contain battles that are closed for voting
      */
     public function scopeCompleted($query)

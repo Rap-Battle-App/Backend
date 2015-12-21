@@ -20,57 +20,36 @@ class BattleController extends Controller
     //return a single Battle Object identified by id
     public function getBattle($id) 
     {	
-
-            
         $battleInfo = Battle::findOrFail($id);
 
-        $profilePreview1 = array();
-        $profilePreview1->user_id = $battleInfo->rapper1_id; //Erreor: Attempt to assign property of non-object
-        $profilePreview1->username = User::findOrFail($battleInfo->rapper1_id)->username;
-        $profilePreview1->profile_picture = User::findOrFail($battleInfo->rapper1_id)->picture;
+        $profilePreview1 = array(
+            'user_id' => $battleInfo->rapper1_id,
+            'username' => User::findOrFail($battleInfo->rapper1_id)->username,
+            'profile_picture' => User::findOrFail($battleInfo->rapper1_id)->picture,
+	);
+
+        $profilePreview2 = array(
+            'user_id' => $battleInfo->rapper2_id,
+            'username' => User::findOrFail($battleInfo->rapper2_id)->username,
+            'profile_picture' => User::findOrFail($battleInfo->rapper2_id)->picture,
+	);
+
+        $voting = array(
+            'votes_rapper1' => $battleInfo->votes_rapper1,
+            'votes_rapper2' => $battleInfo->votes_rapper2,
+            'voted_for' => '', // TODO: who did the user vote for?
+            'open' => $battleInfo->isOpenVoting(),
+	);
+
+        $battle = array(
+            'id' => $battleInfo->id,
+            'video_url' => $battleInfo->video,
+            'rapper1' => $profilePreview1,
+            'rapper2' => $profilePreview2,
+            'voting' => $voting,
+        );
         
-
-        $profilePreview2 = array();
-        $profilePreview2->user_id = $battleInfo->rapper2_id;
-        $profilePreview2->username = getUser($battleInfo->rapper2_id)->name;
-        $profilePreview2->profile_picture = getProfile($battleInfo->rapper2_id)->profile_picture;
-
-        $voting = array();
-        $voting->votes_rapper1 = $battleInfo->votes_rapper1;
-        $voting->votes_rapper2 = $battleInfo->votes_rapper2;
-        $voting->voted_for = ""; //what???
-
-
-        //thats what I call a dirty hack ;)
-
-        $openOrNot = true;
-        try{
-            getOpenBattle($id);
-        }
-        catch(ModelNotFoundException $e){
-            $openOrNot = false;
-        }
-
-        
-        $voting->open = $openOrNot;
-
-
-
-        $battle = array();
-        $battle->id = $battleInfo->id;
-        $battle->video_url = $battleInfo->video;
-        $battle->rapper1 = $profilePreview1;
-        $battle->rapper2 = $profilePreview2;
-        $battle->voting = $voting;
-        
-        
-            
-
         return $battle;
-        
-    
-
-        //return Battle::findOrFail($id);
     }
 	
     //return an Array of Battles with the most votes
