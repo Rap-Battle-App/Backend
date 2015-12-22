@@ -54,4 +54,4 @@ class ControllerDataAccessTest extends TestCase
 
         $this->get('/video/{id}', ['id' => $battle->id]);
     }
-
+}
