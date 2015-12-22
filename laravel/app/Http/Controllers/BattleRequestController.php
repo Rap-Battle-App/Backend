@@ -40,7 +40,7 @@ class BattleRequestController extends Controller
             return $request->toJSON_Challenged();
         });
 
-        return response()->json(['requests' => $requests, 'requests_opponent' => $requestsOpponent]);
+        return response()->json(['requests' => $requests, 'opponent_requests' => $requestsOpponent]);
     }
 
     /**
@@ -93,7 +93,7 @@ class BattleRequestController extends Controller
         $battleRequest = BattleRequest::findOrFail($id);
 
         // Check if authenticated user is challenged user
-        if ($battleRequest->challenged == $request->user()) {
+        if ($battleRequest->challenger_id == $request->user()->id) {
             if ($request->input('accepted')) {
                 $battle = new OpenBattle;
                 $battle->start($battleRequest->challenger, $battleRequest->challenged);
