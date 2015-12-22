@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Auth;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 use App\Models\User;
 use App\Models\Battle;
@@ -51,11 +52,30 @@ class BattleController extends Controller
         
         return response()->json($battleInfo);
     }
+
+    // create a BattleOverview array
+    private function createBattleOverview($battles){
+        $data = array();
+        foreach($battles as $battle){
+            $data[] = ['battle_id' => $battle->id,
+                    'rapper1' => $battle->rapper1()->first()->profilePreview(),
+                    'rapper2' => $battle->rapper2()->first()->profilePreview()];
+        }
+        return $data;
+    }
 	
     //return an Array of Battles with the most votes
     public function getTrending(Request $request)
     {
-        return Battle::trending()->paginate($request->input('amount'));
+        $trending = Battle::trending()->get();
+        $data = $this->createBattleOverview($trending);
+
+        $amount = $request->input('amount', 15);
+        $page = $request->input('page', 1);
+        // slice requested data set for paginator
+        $slicedData = array_slice($data, $amount * ($page - 1), $amount);
+
+        return new LengthAwarePaginator($slicedData, count($data), $amount, $page);
     }
 	
     //return an Array of Battles that are still open for voting
@@ -69,8 +89,15 @@ class BattleController extends Controller
             // get all battles
             $battles = Battle::openVoting();
         }
- 
-        return $battles->paginate($request->input('amount'));
+
+        $data = $this->createBattleOverview($battles->get());
+
+        $amount = $request->input('amount', 15);
+        $page = $request->input('page', 1);
+        // slice requested data set for paginator
+        $slicedData = array_slice($data, $amount * ($page - 1), $amount);
+
+        return new LengthAwarePaginator($slicedData, count($data), $amount, $page);
     }
 	
     //return all Battles that are no longer open for voting for the current user
@@ -85,16 +112,30 @@ class BattleController extends Controller
             $battles = Battle::completed();
         }
  
-        return $battles->paginate($request->input('amount'));
+        $data = $this->createBattleOverview($battles->get());
+
+        $amount = $request->input('amount', 15);
+        $page = $request->input('page', 1);
+        // slice requested data set for paginator
+        $slicedData = array_slice($data, $amount * ($page - 1), $amount);
+
+        return new LengthAwarePaginator($slicedData, count($data), $amount, $page);
     }
 	
     //return an Array of all openBattles for the current user
-    public function getOpen()
+    public function getOpen(Request $request)
     {
         // get open battles by user
         $battles = Auth::user()->openBattles();
  
-        return $battles->paginate();
+        $data = $this->createBattleOverview($battles->get());
+
+        $amount = $request->input('amount', 15);
+        $page = $request->input('page', 1);
+        // slice requested data set for paginator
+        $slicedData = array_slice($data, $amount * ($page - 1), $amount);
+
+        return new LengthAwarePaginator($slicedData, count($data), $amount, $page);
     }
 	
     //increase the votes of a single rapper in one battle identified by id 
