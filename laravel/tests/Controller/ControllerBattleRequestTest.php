@@ -81,7 +81,7 @@ class ControllerBattleRequestTest extends TestCase
         $br->challenger_id = $user1;
         $br->challenged_id = $user2;
         $br->save();
-        $this->post('/request/{id}' , ['accepted' = TRUE]);
+        $this->post('/request/{id}' , ['accepted' == TRUE]);
         $oP=OpenBattle::find($br->challenger_id);
 
         $this->assertEquals($br->challenger_id, $oP->rapper1_id);
@@ -106,3 +106,4 @@ class ControllerBattleRequestTest extends TestCase
         //need to send the logged in user as well. how?
         $this->get('/request/random');
     }	
+}
