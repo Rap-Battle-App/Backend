@@ -128,16 +128,20 @@ class BattleRequestController extends Controller
             // Increase the search range exponentially to make sure an opponent is found.
             $exponentialBase = 2;
             $rating = $user->rating;
-            for ($i = 0; is_null($opponent); $i++) {
-                $range = pow($exponentialBase, $i);
-                $minRating = $rating - $range;
-                $maxRating = $rating + $range;
+            $validOpponents = User::validOpponentFor($user);
+            $validOpponentsCnt = $validOpponents->count();
+            if(!$validOpponents->get()->isEmpty()){
+                for ($i = 0; is_null($opponent); $i++) {
+                    $range = pow($exponentialBase, $i);
+                    $minRating = $rating - $range;
+                    $maxRating = $rating + $range;
 
-                $possibleOpponents = User::validOpponentFor($user)->ratedBetween($minRating, $maxRating)->get();
-                if (!$possibleOpponents->isEmpty()) {
-                    $opponent = $possibleOpponents->random();
-                    // Log for later optimizing
-                    Log::info('Random opponent found.', ['possible opponents' => $possibleOpponentCount, 'exponential base' => $exponentialBase, 'iterations' => $i]);
+                    $possibleOpponents = $validOpponents->ratedBetween($minRating, $maxRating)->get();
+                    if (!$possibleOpponents->isEmpty()) {
+                        $opponent = $possibleOpponents->random();
+                        // Log for later optimizing
+                        Log::info('Random opponent found.', ['possible opponents' => $possibleOpponentCount, 'exponential base' => $exponentialBase, 'iterations' => $i]);
+                    }
                 }
             }
         }

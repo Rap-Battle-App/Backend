@@ -129,11 +129,10 @@ class User extends Model implements AuthenticatableContract,
     public function scopeNoBattleRequestsAgainst($query, User $user)
     {
         // get opponents of $user
-        $requests = $user->battleRequests()->get()->values();
-        $challenger = $requests->keyBy('challenger_id')->keys()->unique()->toArray();
-        $challenged = $requests->keyBy('challenged_id')->keys()->unique()->toArray();
-
-        return $query->whereNotIn('id', array_merge($challenger, $challenged));
+        $challenger = $user->battleRequests()->lists('challenger_id')->toArray();
+        $challenged = $user->battleRequests()->lists('challenged_id')->toArray();
+        $array = array_merge($challenger, $challenged);
+        return $query->whereNotIn('id', $array);
     }
 
     /**
@@ -181,9 +180,8 @@ class User extends Model implements AuthenticatableContract,
     public function scopeNoOpenBattleAgainst($query, User $user)
     {
         // get opponents of $user
-        $battles = $user->openBattles()->get()->values();
-        $rapper1 = $battles->keyBy('rapper1_id')->keys()->unique()->toArray();
-        $rapper2 = $battles->keyBy('rapper2_id')->keys()->unique()->toArray();
+        $rapper1 = $user->openBattles()->lists('rapper1_id')->toArray();
+        $rapper2 = $user->openBattles()->lists('rapper2_id')->toArray();
 
         return $query->whereNotIn('id', array_merge($rapper1, $rapper2));
     }
@@ -202,6 +200,11 @@ class User extends Model implements AuthenticatableContract,
     public function scopeRatedBetween($query, $min, $max)
     {
         //$this->updateRating();
+        if($min > $max){
+            $tmp = $min;
+            $min = $max;
+            $max = $tmp;
+        }
         return $query->whereBetween('rating', [$min, $max]);
     }
 
