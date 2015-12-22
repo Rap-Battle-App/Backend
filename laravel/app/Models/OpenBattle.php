@@ -54,4 +54,76 @@ class OpenBattle extends Model
         $this->rapper2()->associate($rapper2);
         $this->phase = 1;
     }
+
+    /**
+     *
+     */
+    private function makeRoundUrl($key)
+    {
+        return is_null($this->attributes[$key]) ? null : route('data.video', ['file' => $this->attributes[$key]]);
+    }
+
+    /**
+     *
+     */
+    private function phaseInfo($rapperNumber)
+    {
+        $rapper = 'rapper'.$rapperNumber;
+        $opponent = 'rapper'.($rapperNumber == 1 ? 2 : 1);
+
+        $phaseInfo = [
+            //'time_left' => ,//todo
+            'round1_url' => $this->makeRoundUrl($rapper.'_round1')
+        ];
+
+        if ($this->phase == 2) {
+            $phaseInfo['beat_id'] = $rapperNumber == 1 ? $this->beat2_id : $this->beat1_id;
+            $phaseInfo['opponent_round1_url'] = $this->makeRoundUrl($opponent.'_round1');
+            $phaseInfo['round2_url'] = $this->makeRoundUrl($rapper.'_round2');
+        }
+
+        return $phaseInfo;
+    }
+
+    /**
+     *
+     */
+    public function hasFirstRounds()
+    {
+
+    }
+
+    /**
+     *
+     */
+    public function hasAllRounds()
+    {
+
+    }
+
+    /**
+     *
+     */
+    public function toJSON_Rapper1()
+    {
+        return [
+            'id' => $this->id,
+            'opponent' => $this->rapper2->profilePreview(),
+            'phase' => $this->phase,
+            'info' => $this->phaseInfo(1)
+        ];
+    }
+
+    /**
+     *
+     */
+    public function toJSON_Rapper2()
+    {
+        return [
+            'id' => $this->id,
+            'opponent' => $this->rapper1->profilePreview(),
+            'phase' => $this->phase,
+            'info' => $this->phaseInfo(2)
+        ];
+    }
 }

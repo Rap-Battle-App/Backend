@@ -3,22 +3,21 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Auth;
+use Storage;
 use App\Models\OpenBattle;
 use App\Models\Battle;
 use App\Models\User;
-use App\Http\Requests;
-use App\Http\Controllers\Controller;
-use Storage;
 
 class OpenBattleController extends Controller
 {
     /*
     |--------------------------------------------------------------------------
-    | open Battle Controller
+    | Open Battle Controller
     |--------------------------------------------------------------------------
     |
     | This controller is responsible for handling the data of the open battles
-    | and closing the entry, processing video and adding the final result of 
+    | and closing the entry, processing video and adding the final result of
     | battle to the battle table
     |
     */
@@ -27,92 +26,104 @@ class OpenBattleController extends Controller
      * Handle a search request and return the open battle which is required to be
      * updated.
      *
-     * @param  \Illumnate\Http\Request  Id
+     * @param  integer  id
      * @return \Illuminate\Http\JsonResponse
      */
-
-
     public function getBattle($id)
     {
-        $validator = Validator::make($request->all(), [
-            'id' => 'required|integer|max:10'
-        ]);
+        $battle = OpenBattle::findOrFail($id);
+        $user = Auth::user();
 
-        
-            $user_id = Auth::user()->id;
-            $battle = App\open_battles::findOrFail($id);
-           
-            if($user_id == $battle->rapper1_id) 
-                $profile = App\User::findOrFail($battle->rapper2_id);
-            else
-                $profile = App\User::findOrFail($battle->rapper1_id);
+        if ($user == $battle->rapper1) {
+            $battle = $battle->toJSON_Rapper1();
+        } elseif ($user == $battle->rapper2) {
+            $battle = $battle->toJSON_Rapper2();
+        } else {
+            return response('Unauthorized.', 401);
+        }
 
-            $profiles = $profile->map(function($profile, $key) {              //check please
-            return $profile->profilePreview();
-        });
-
-            $phase1Info = array();
-            $phase1Info->round1_url = $battle->rapper1_round1;
-
-            $phase2Info = array();
-            $phase2Info->round1_url = $battle->rapper1_round1;
-            $phase2Info->beat_id = $battle->beat1_id;
-            $phase2Info->opponent_round1_url = $battle->rapper2_round1;
-            $phase2Info->round2_url= $battle->rapper1_round2;
-
-
-            $phaseInfo = array();
-            $phaseInfo->time_left = (24*60*60)-$battle->phase_start;      //need some work here // is it finished ? O.o  //don't know the lenght of round
-                                                                 //assuming it to 24 hours
-
-            $phaseInfo->phase1Info = $phase1Info;
-            $phaseInfo->phase2Info = $phase2Info;
-
-            $openBattle = array();
-            $openBattle->id = $battle->id; 
-            $openBattle->opponent = $profiles;            
-            $openBattle->phase = $battle->phase;
-            $openBattle->info= $phaseInfo;
-
-            return response()->json(['openBattles' => $openBattles]);           
-        
+        return response()->json($battle);
     }
 
+    public function postRound(Request $request, $id)
+    {
+        $this->validate($request, [
+            'beat_id' => 'required|integer',
+            'video' => 'required' // add mime validation rule?
+        ]);
+
+        $battle = OpenBattle::findOrFail($id);
+        $user = $request->user();
+
+        $rapperNumber = 0;
+        if ($user == $battle->rapper1) {
+            $rapperNumber = 1;
+        } elseif ($user == $battle->rapper2) {
+            $rapperNumber = 2;
+        } else {
+            return response('Unauthorized.', 401);
+        }
+
+        //TODO convert video/fire events
+
+        // Name of the column the video needs to be saved in
+        $videoColumn = 'rapper'.$rapperNumber.'_round'.$this->phase;
+        // Name of the video
+        $videoName = $battle->id.'_'.$videoColumn;
+        $video = $request->file('video');
+        // Name of video on the disk
+        $videoFilename = $videoName.'.'.$video->guessExtension();
+        Storage::disk('videos')->put($videoFilename, file_get_contents($video->getRealPath()));
+
+        $battle[$videoColumn] = $videoFilename;
+        // Set beat id
+        if ($battle->phase == 1) {
+            $battle['beat'.$rapperNumber.'_id'] = $request->input('beat_id');
+            // Go to phase 2 if both 1st rounds are uploaded
+            if ($battle->hasFirstRounds()) {
+                $battle->phase++;
+            }
+        } elseif ($battle->phase == 2 && $battle->hasAllRounds()) {
+            //TODO battle done, concat video, create battle, delete open battle - maybe need to do this when conversion is done
+        }
+
+        $battle->save();
+    }
 
     /**
      * Handle a posted round functionalilites.
      * Checks the phase of round upload the beat according to the phase
      * Checks the user, and according uploads the video in the filesystem
-     * If all the videos are there, calls the video concatenation function and uploads the  
+     * If all the videos are there, calls the video concatenation function and uploads the
      * openBattle entry with the final video to the battle table and closes the entry here
      *
      * @param  \Illumnate\Http\Request  Beat_id
      * @param  \Illumnate\Http\Request  Video
      */
-    public function postRound(Request $request , $id)
+    /*public function postRound(Request $request , $id)
     {
         $validator = Validator::make($request->all(), [
-            'beat_id' => 'required|integer' , 
+            'beat_id' => 'required|integer' ,
             'video' => 'required|byte'
         ]);
 
-        
+
            $id = Auth::user()->id;
            $out_link =  OpenBattleController::moveVideoFile($request->video);
            //$in_link = '/path/to/inputvideo1';
-           
+
            $event = new App\Events\VideoWasUploaded($out_link, [$out_link]);      //because video will be converted in the filesystem
                                                                                   // and replaced there only after conversion
 
            Event::fire($event);
 
-          
+
           // Phase system
           // 1 - 4
           // 1 means 1 video in file system
-          // 4 means 4 videos in filesystem, time to concatenate and move 
+          // 4 means 4 videos in filesystem, time to concatenate and move
 
-           $op_battle = OpenBattle::findOrFail($id);            
+           $op_battle = OpenBattle::findOrFail($id);
            $battleRound = array();
            if($op_battle->phase < 2 && $op_battle->phase > 0)
            {
@@ -133,10 +144,10 @@ class OpenBattleController extends Controller
               else
                   $op_battle->rapper2_round2 = $out_link;
 
-              $op_battle->phase++;      //phase changed  
+              $op_battle->phase++;      //phase changed
            }
            $op_battle->save();
-           if($op_battle->phase == 4)   //both rounds are done and needs to close this open_battle entry and 
+           if($op_battle->phase == 4)   //both rounds are done and needs to close this open_battle entry and
                                         //concatenate the video and add the final result to the battle table
            {
               $battle = new Battle;
@@ -156,39 +167,39 @@ class OpenBattleController extends Controller
               //new entry in the battle created
 
               $battle->save();
-              
+
               //entry from the open battle removed
 
               $op_battle->delete();
            }
-           
-           
-        
-    }
-   
+
+
+
+    }*/
+
     // ============================================
     // Logic for video file naming and moving
     // (only needed by this class)
- 
+
     /**
      * Adds a path to a filename depending on the first two letters of the filename
      *
      * @return suggested (not checked) path and filename relative to the filesystem
      */
-    private static function filePath($filename)
+    /*private static function filePath($filename)
     {
         // create path for sub-directory to decrease file count per directory
         $path = substr($filename, 0, 2);
         return $path . '/' . $filename;
-    }
+    }*/
 
     /**
      * Zeropadding for numbers
      */
-    private static function zeropad($num, $lim)
+    /*private static function zeropad($num, $lim)
     {
         return (strlen($num) >= $lim) ? $num : OpenBattleController::zeropad("0" . $num, $lim);
-    }
+    }*/
 
     /**
      * PHP seems not to reliably support 64bit integers on all systems
@@ -196,7 +207,7 @@ class OpenBattleController extends Controller
      *
      * @return num + 1
      */
-    private static function int64Increment($num)
+    /*private static function int64Increment($num)
     {
         // split string in 3 parts (<32 bits, integers are signed)
         $lowString = substr($num, 20, 12);
@@ -226,14 +237,14 @@ class OpenBattleController extends Controller
 
         // concatenate strings
         return $highStringInc . $middleStringInc . $lowStringInc;
-    }
+    }*/
 
     /**
      * Renames and moves a video file to it's right position in the filesystem
      *
      * @return new path and filename relative to the filesystem
      */
-    private static function moveVideoFile($infile)
+    /*private static function moveVideoFile($infile)
     {
         // get hash of video file
         $hash = hash_file('md5', $infile);
@@ -257,8 +268,6 @@ class OpenBattleController extends Controller
             fclose($stream);
             unlink($infile);
         }
-
         return $outfile;
-    }
-
+    }*/
 }
