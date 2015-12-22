@@ -129,7 +129,7 @@ class BattleRequestController extends Controller
             $exponentialBase = 2;
             $rating = $user->rating;
             for ($i = 0; is_null($opponent); $i++) {
-                $range = $exponentialBase ** $i;
+                $range = pow($exponentialBase, $i);
                 $minRating = $rating - $range;
                 $maxRating = $rating + $range;
 
