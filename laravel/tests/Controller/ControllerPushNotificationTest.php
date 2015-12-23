@@ -19,14 +19,11 @@ class PushNotificationControllerTest extends TestCase
      *	Testing the PushNotificationController
      * 
      */
-
-
-
     public function testPostNotifications()
     {
         //$this->withoutMiddleware();
         $user = factory(App\Models\User::class)->create();
-        
+    
 
         //echo $user->device_token;
 
@@ -37,6 +34,5 @@ class PushNotificationControllerTest extends TestCase
         //checking the updation
         $this->assertEquals('12345', $user->device_token);
 
-             
     }
-	
+}	
