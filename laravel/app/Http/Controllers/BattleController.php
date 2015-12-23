@@ -126,7 +126,7 @@ class BattleController extends Controller
     public function getOpen(Request $request)
     {
         // get open battles by user
-        $battles = Auth::user()->openBattles();
+        $battles = Auth::user()->openBattles(); //error by phpunit
  
         $data = $this->createBattleOverview($battles->get());
 
