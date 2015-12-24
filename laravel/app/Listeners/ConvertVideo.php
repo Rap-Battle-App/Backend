@@ -20,6 +20,8 @@ use FFMpeg\Coordinate\Dimension;
  */
 class ConvertVideo implements ShouldQueue
 {
+    use InteractsWithQueue;
+
     /**
      * Create the event listener.
      *
@@ -27,7 +29,6 @@ class ConvertVideo implements ShouldQueue
      */
     public function __construct()
     {
-        //
     }
 
     /**

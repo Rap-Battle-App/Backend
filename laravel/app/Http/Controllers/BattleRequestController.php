@@ -93,7 +93,7 @@ class BattleRequestController extends Controller
         $battleRequest = BattleRequest::findOrFail($id);
 
         // Check if authenticated user is challenged user
-        if ($battleRequest->challenger_id == $request->user()->id) {
+        if ($battleRequest->challenged_id == $request->user()->id) {
             if ($request->input('accepted')) {
                 $battle = new OpenBattle;
                 $battle->start($battleRequest->challenger, $battleRequest->challenged);

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use Storage;
 
 class OpenBattle extends Model
 {
@@ -43,6 +44,19 @@ class OpenBattle extends Model
     }
 
     /**
+     * Remove model from database
+     */
+    public function delete(){
+        // clean filesystem
+        Storage::disk('videos')->delete($this->rapper1_round1);
+        Storage::disk('videos')->delete($this->rapper2_round1);
+        Storage::disk('videos')->delete($this->rapper1_round2);
+        Storage::disk('videos')->delete($this->rapper2_round2);
+
+        parent::delete();
+    }
+
+    /**
      * Start an open battle.
      *
      * @param \App\Models\User  $rapper1
@@ -64,7 +78,7 @@ class OpenBattle extends Model
     }
 
     /**
-     *
+     * Gets the phase info
      */
     private function phaseInfo($rapperNumber)
     {
@@ -86,19 +100,24 @@ class OpenBattle extends Model
     }
 
     /**
-     *
+     * Check whether the first round is complete (both videos set)
      */
     public function hasFirstRounds()
     {
-
+        return !empty($this->rapper1_round1)
+            && !empty($this->rapper2_round1)
+            /*&& $this->phase >= 1*/;
     }
 
     /**
-     *
+     * Check whether all rounds are complete (all videos set)
      */
     public function hasAllRounds()
     {
-
+        return $this->hasFirstRounds()
+            && !empty($this->rapper1_round2)
+            && !empty($this->rapper2_round2)
+            && $this->phase >= 2;
     }
 
     /**

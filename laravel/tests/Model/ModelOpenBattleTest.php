@@ -49,4 +49,40 @@ class ModelOpenBattleTest extends TestCase
         $this->assertNotNull($openBattle->rapper1()->get()->values()->keyBy('id')->get($user1->id));
         $this->assertNotNull($openBattle->rapper2()->get()->values()->keyBy('id')->get($user2->id));
     }
+
+    /**
+     * Test for hasFirstRounds() and hasAllRounds()
+     */
+    public function testHasAllRounds(){
+        $openBattle1 = new OpenBattle;
+        $openBattle2 = new OpenBattle;
+        $openBattle2->rapper1_round1 = 'rapper1_round1.mp4';
+        $openBattle3 = new OpenBattle;
+        $openBattle3->rapper1_round1 = 'rapper1_round1.mp4';
+        $openBattle3->rapper2_round1 = 'rapper2_round1.mp4';
+        $openBattle3->phase = 2;
+        $openBattle4 = new OpenBattle;
+        $openBattle4->rapper1_round1 = 'rapper1_round1.mp4';
+        $openBattle4->rapper2_round1 = 'rapper2_round1.mp4';
+        $openBattle4->rapper1_round2 = 'rapper1_round2.mp4';
+        $openBattle4->phase = 2;
+        $openBattle4 = new OpenBattle;
+        $openBattle4->rapper1_round1 = 'rapper1_round1.mp4';
+        $openBattle4->rapper2_round1 = 'rapper2_round1.mp4';
+        $openBattle4->rapper1_round2 = 'rapper1_round2.mp4';
+        $openBattle4->rapper2_round2 = 'rapper2_round2.mp4';
+        $openBattle4->phase = 2;
+
+        $this->assertFalse($openBattle1->hasFirstRounds());
+        $this->assertFalse($openBattle1->hasAllRounds());
+
+        $this->assertFalse($openBattle2->hasFirstRounds());
+        $this->assertFalse($openBattle2->hasAllRounds());
+
+        $this->assertTrue($openBattle3->hasFirstRounds());
+        $this->assertFalse($openBattle3->hasAllRounds());
+
+        $this->assertTrue($openBattle4->hasFirstRounds());
+        $this->assertTrue($openBattle4->hasAllRounds());
+    }
 }
