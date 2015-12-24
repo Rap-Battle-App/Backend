@@ -92,7 +92,7 @@ class DatabaseSeeder extends Seeder
             $openBattle = new OpenBattle;
             $openBattle->rapper1_id = $usersRapper->get($i)->id;
             $openBattle->rapper2_id = $usersRapper->get($i+1)->id;
-            $openBattle->phase = rand(0, 3); // TODO: how many phases?
+            $openBattle->phase = rand(1, 2); // TODO: how many phases?
             $openBattle->beat1_id = rand(0, 2);
             $openBattle->beat2_id = rand(0, 2);
             $openBattle->save();
