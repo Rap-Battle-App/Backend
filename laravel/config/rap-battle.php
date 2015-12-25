@@ -76,4 +76,21 @@ return [
 
     'audio_codec' => 'libmp3lame',
 
+    /*
+    |--------------------------------------------------------------------------
+    | FFmpeg configuration
+    |--------------------------------------------------------------------------
+    |
+    | ffmpeg_binary: path to ffmpeg binary (autodetect if not set)
+    | ffprobe_binary: path to ffprobe binary (autodetect if not set)
+    | ffmpeg_timeout: timeout for ffmpeg
+    | ffmpeg_threads: number of threads ffmpeg will use for video conversion
+    |
+    */
+
+    // 'ffmpeg_binary' => './ffmpeg-2.8.4-32bit-static/ffmpeg',
+    // 'ffprobe_binary' => './ffmpeg-2.8.4-32bit-static/ffprobe',
+    // 'ffmpeg_timeout' => '3600',
+    // 'ffmpeg_threads' => '12',
+
 ];

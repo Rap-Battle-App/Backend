@@ -42,7 +42,20 @@ class ConvertVideo implements ShouldQueue
         if(empty($event->outfile) || empty($event->infiles)){
             throw new InvalidArgumentException('No video files given');
         } else {
-            $ffmpeg = FFMpeg\FFMpeg::create();
+            // get ffmpeg configuration
+            $ffmpegBinary = config('rap-battle.ffmpeg_binaries');
+            $ffprobeBinary = config('rap-battle.ffprobe_binaries');
+            $timeout = config('rap-battle.ffmpeg_timeout', 3600);
+            $ffmpegThreads = config('rap-battle.ffmpeg_threads', 12);
+
+            $conf = array();
+            if(!empty($ffmpegBinary))   $conf['ffmpeg.binary']  = $ffmpegBinary;
+            if(!empty($ffprobeBinary))  $conf['ffprobe.binary'] = $ffprobeBinary;
+            if(!empty($timeout))        $conf['timeout']          = $timeout;
+            if(!empty($ffmpegThreads))  $conf['ffmpeg.threads']   = $ffmpegThreads;
+            
+            $ffmpeg = FFMpeg\FFMpeg::create($conf);
+
 
             // create video objects
             foreach($event->infiles as $file){
