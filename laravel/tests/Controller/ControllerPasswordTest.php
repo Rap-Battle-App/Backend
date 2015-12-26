@@ -4,6 +4,7 @@ use App\Http\Controllers\PasswordController;
 use App\Models\Battle;
 use App\Models\User;
 use Carbon\Carbon;
+use Hash;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
@@ -26,6 +27,9 @@ class ControllerPasswordTest extends TestCase
 
         // here also your email address
         $this->post('/password-recovery/email', ['email' => 'testuser123@gmail.com']);
+
+        //checking
+        //put your email and check whether i you're getting any reset email or not
              
     }
 	
@@ -46,7 +50,9 @@ class ControllerPasswordTest extends TestCase
                 ['email' => 'testuser123@gmail.com',
                 'token' => '1q2w3e4r5t6y7u8i',
                 'password' => 'password123']);
-        $this->assertEquals('password123', $user->password); 
+        //checking 
+        //crypting to compare crypted password
+        $this->assertEquals(bcrypt('password123'), $user->password); 
 
     }
 
