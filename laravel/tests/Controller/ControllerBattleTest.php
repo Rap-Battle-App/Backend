@@ -74,9 +74,6 @@ class ControllerBattleTest extends TestCase
         // create users
         $user1 = factory(App\Models\User::class)->create();
         $user2 = factory(App\Models\User::class)->create();
-        $user1->save();
-        $user2->save();
-
         // create battles
         for($i = 0; $i < 10; ++$i){
             $battle = new Battle;

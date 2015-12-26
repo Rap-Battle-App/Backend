@@ -21,11 +21,11 @@ class PushNotificationControllerTest extends TestCase
      */
     public function testPostNotifications()
     {
-        //$this->withoutMiddleware();
+        
         $user = factory(App\Models\User::class)->create();
     
 
-        //echo $user->device_token;
+        
 
 
 

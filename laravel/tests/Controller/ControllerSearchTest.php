@@ -36,8 +36,15 @@ class ControllerSearchTest extends TestCase
         
 
 
-        $this->post('/search', ['search_string' => 'use']);
-            
+        $this->post('/search', ['search_string' => 'user12'])->seeJson([
+                {
+                    'username' => 'user12'
+                },
+                {
+                    'username' => 'user123'
+                }
+            ]);
+      
     
     }
 	
