@@ -52,7 +52,9 @@ class ControllerPasswordTest extends TestCase
                 'password' => 'password123']);
         //checking 
         //crypting to compare crypted password
-        $this->assertEquals(bcrypt('password123'), $user->password); 
+        $options = array('cost' => 15);
+        $new_password = 'password123';
+        $this->assertEquals($user->password, password_hash($new_password,PASSWORD_BCRYPT,$options)); 
 
     }
 

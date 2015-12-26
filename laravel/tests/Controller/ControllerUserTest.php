@@ -33,9 +33,11 @@ class ControllerUserTest extends TestCase
         //echo $user->username;
         //echo $user->id;
 
-
-
-        $this->get('/user/{id}', ['id' => $user->id]);
+        $this->get('/user/{id}', ['id' => $user->id])->seeJson([
+                {
+                    'rating' => 3
+                }
+            ]);
             
     }
 	
@@ -82,7 +84,11 @@ class ControllerUserTest extends TestCase
         //echo $user->rapper;
         //echo $user->notifications;
 
-        $this->get('/account/settings');
+        $this->get('/account/settings')->seeJson([
+                {
+                    'rapper' => $user->rapper
+                }
+            ]);
 
         
 
@@ -98,7 +104,7 @@ class ControllerUserTest extends TestCase
         //echo $user->notifications;
 
         $this->post('/account/settings', ['rapper' => TRUE , 'notifications' => FALSE ]);
-        
+        //checking
         $this->assertEquals(TRUE, $user->rapper);
     }	
 
@@ -115,7 +121,7 @@ class ControllerUserTest extends TestCase
 
         $this->get('/account/username', ['id' => $user->id]);
 
-        
+        //checking
         $this->assertEquals('smithjones', $user->username);
              
     }
