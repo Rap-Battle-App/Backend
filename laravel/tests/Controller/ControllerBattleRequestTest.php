@@ -43,8 +43,18 @@ class ControllerBattleRequestTest extends TestCase
 
         //need to send the logged in user as well. how?
         //check for the user4
-        $this->get('/request');
-    }
+        $this->get('/request')->seeJson([
+                {
+                    'requests'->'opponent'->'user_id' => $user1->id
+                },
+                {
+                    'requests'->'opponent'->'user_id' => $user3->id
+                },
+                {
+                    'requests'->'opponent'->'user_id' => $user2->id
+                }
+            ]);
+            }
 	
     
     /**
@@ -83,7 +93,7 @@ class ControllerBattleRequestTest extends TestCase
         $br->save();
         $this->post('/request/{id}' , ['accepted' == TRUE]);
         $oP=OpenBattle::find($br->challenger_id);
-
+        //checking the output
         $this->assertEquals($br->challenger_id, $oP->rapper1_id);
 
     }
