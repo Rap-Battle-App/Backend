@@ -114,6 +114,10 @@ class ControllerBattleRequestTest extends TestCase
 
 
         //need to send the logged in user as well. how?
-        $this->get('/request/random');
+        $this->get('/request/random')->seeJson([
+                {
+                    'opponent'->'username' => {$user1->username , $user2->username , $user3->username , $user4->username , $user5->username , $user6->username}
+                }
+            ]);
     }	
 }
