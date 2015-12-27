@@ -18,6 +18,7 @@ class VideoWasUploaded extends Event
     public $outfile;
     public $infiles;
     public $deleteOnSuccess;
+    public $followingEvent;
 
     /**
      * Create a new event instance.
@@ -25,16 +26,18 @@ class VideoWasUploaded extends Event
      * @param $outfile path and name of the resulting video file will be
      * @param $infile array of the input video files add multiple files to concatenate them
      * @param $deleteOnSuccess delete the original video file if the conversion succeeded
+     * @param $followingEvent will be called after successsful video conversion
      *
      * @return void
      */
-    public function __construct($outfile, $infiles, $deleteOnSuccess = false)
+    public function __construct($outfile, $infiles, $deleteOnSuccess = false, $followingEvent)
     {
         if(!is_array($infiles)) $infiles = [$infiles];
 
         $this->outfile = $outfile;
         $this->infiles = $infiles;
         $this->deleteOnSuccess = $deleteOnSuccess;
+        $this->followingEvent = $followingEvent;
     }
 
     /**

@@ -9,7 +9,7 @@ use Storage;
 
 use App\Models\OpenBattle;
 
-class OpenBattleCompleted extends VideoWasUploaded
+class OpenBattleCompleted
 {
     use SerializesModels;
 
@@ -21,22 +21,10 @@ class OpenBattleCompleted extends VideoWasUploaded
      *
      * @return void
      */
-    public function __construct(OpenBattle $openBattle)
+    public function __construct(OpenBattle $openBattle, $outfilename)
     {
         $this->openBattle = $openBattle;
-
-        // input files in filesystem
-        $infiles = array();
-        $infiles[] = Storage::disk('videos')->getAdapter()->applyPathPrefix($openBattle->rapper1_round1);
-        $infiles[] = Storage::disk('videos')->getAdapter()->applyPathPrefix($openBattle->rapper2_round1);
-        $infiles[] = Storage::disk('videos')->getAdapter()->applyPathPrefix($openBattle->rapper1_round2);
-        $infiles[] = Storage::disk('videos')->getAdapter()->applyPathPrefix($openBattle->rapper2_round2);
-
-         // new video file name
-        $this->outfilename = '' . $openBattle->id . '.mp4';
-        $outfile = Storage::disk('videos')->getAdapter()->applyPathPrefix($this->outfilename);
-
-        parent::__construct($outfile, $infiles, false);
+        $this->outfilename = $outfilename;
     }
 
     /**

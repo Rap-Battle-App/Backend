@@ -9,7 +9,7 @@ use App\Models\OpenBattle;
 use App\Models\Battle;
 use App\Models\User;
 use App\Events\VideoWasUploaded;
-use App\Events\OpenBattleCompleted;
+use App\Events\OpenBattleVideoConverted;
 
 class OpenBattleController extends Controller
 {
@@ -84,23 +84,21 @@ class OpenBattleController extends Controller
         // convert video/fire events and delete temporary file
         $inFilePath = Storage::disk('videos')->getAdapter()->applyPathPrefix($videoFilenameTmp);
         $outFilePath = Storage::disk('videos')->getAdapter()->applyPathPrefix($videoFilename);
-        \Event::fire(new VideoWasUploaded($outFilePath, $inFilePath, true));
 
-        $battle[$videoColumn] = $videoFilename;
-        // Set beat id
-        if ($battle->phase == 1) {
-            $battle['beat'.$rapperNumber.'_id'] = $request->input('beat_id');
-            // Go to phase 2 if both 1st rounds are uploaded
-            if ($battle->hasFirstRounds()) {
-                $battle->phase++;
-            }
-        } else if ($battle->phase == 2 && $battle->hasAllRounds()) {
-            // note: battle done, concat video, create battle, delete open battle - maybe need to do this when conversion is done
-            // concatenates the videos, converts the OpenBattle to a Battle and deletes the old video files
-            \Event::fire(new OpenBattleCompleted($battle));
-        }
-
-        $battle->save();
+        /*
+         * The event 'VideoWasUploaded' will be pushed on the queue and convert
+         * the uploaded video. If the conversion succeds a following event will
+         * be fired, in this case 'OpenBattleVideoConverted'. 'OpenBattleVideoConverted'
+         * writes $videoFileName to the file column $videoColumn of $battle and
+         * sets the beat_id. When all videos are uploaded 'OpenBattleVideoConverted
+         * fires another event ('OpenBattleCompleted') to concatenate the video
+         * files and to convert the OpenBattle to a Battle. This approach was choosen
+         * since these steps depend on each other. When one step fails but the
+         * following gets executed the OpenBattle may get 'corrupted' (eg. by
+         * missing video files) and the conversion to a finished Battle will fail.
+         */
+        \Event::fire(new VideoWasUploaded($outFilePath, $inFilePath, true, 
+                new OpenBattleVideoConverted($battle, $videoFilename, $videoColumn, $rapperNumber, $request->input('beat_id'))));
     }
 
 }

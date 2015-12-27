@@ -10,8 +10,7 @@ use App\Models\Battle;
 /**
  * This Listener converts an OpenBattle to a Battle
  */
-class ConvertOpenBattle implements ShouldQueue
-// This listener should queue so it will be called after the video concatenation job (they're dependant)
+class ConvertOpenBattle
 {
     use InteractsWithQueue;
 
@@ -38,7 +37,7 @@ class ConvertOpenBattle implements ShouldQueue
         $battle = new Battle;
         $battle->rapper1_id = $openBattle->rapper1_id;
         $battle->rapper2_id = $openBattle->rapper2_id;
-        // TODO: check / wait if file doesn't exist
+
         $battle->video = $event->outfilename;
         $battle->save();
 

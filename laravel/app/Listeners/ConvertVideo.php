@@ -43,14 +43,14 @@ class ConvertVideo implements ShouldQueue
             throw new InvalidArgumentException('No video files given');
         } else {
             // get ffmpeg configuration
-            $ffmpegBinary = config('rap-battle.ffmpeg_binaries');
-            $ffprobeBinary = config('rap-battle.ffprobe_binaries');
+            $ffmpegBinary = config('rap-battle.ffmpeg_binary');
+            $ffprobeBinary = config('rap-battle.ffprobe_binary');
             $timeout = config('rap-battle.ffmpeg_timeout', 3600);
             $ffmpegThreads = config('rap-battle.ffmpeg_threads', 12);
 
             $conf = array();
-            if(!empty($ffmpegBinary))   $conf['ffmpeg.binary']  = $ffmpegBinary;
-            if(!empty($ffprobeBinary))  $conf['ffprobe.binary'] = $ffprobeBinary;
+            if(!empty($ffmpegBinary))   $conf['ffmpeg.binaries']  = $ffmpegBinary;
+            if(!empty($ffprobeBinary))  $conf['ffprobe.binaries'] = $ffprobeBinary;
             if(!empty($timeout))        $conf['timeout']          = $timeout;
             if(!empty($ffmpegThreads))  $conf['ffmpeg.threads']   = $ffmpegThreads;
             
@@ -105,6 +105,8 @@ class ConvertVideo implements ShouldQueue
             // delete original video file(s) after successful conversion
             if($event->deleteOnSuccess)
                 foreach($event->infiles as $file) unlink($file);
+            // fire following event
+            if($event->followingEvent != null) \Event::fire($event->followingEvent);
         }
     }
 }

@@ -16,8 +16,10 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\VideoWasUploaded' => [
             'App\Listeners\ConvertVideo',
         ],
+        'App\Events\OpenBattleVideoConverted' => [
+            'App\Listeners\UpdateOpenBattle'
+        ],
         'App\Events\OpenBattleCompleted' => [
-            'App\Listeners\ConvertVideo',
             'App\Listeners\ConvertOpenBattle'
         ]
     ];
