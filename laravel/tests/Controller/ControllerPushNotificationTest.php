@@ -29,10 +29,10 @@ class PushNotificationControllerTest extends TestCase
 
 
 
-        $this->post('/device-token', ['token' => '12345']);
+        $this->post('/device-token', ['token' => "hello"]);
 
         //checking the updation
-        $this->assertEquals('12345', $user->device_token);
+        $this->assertEquals("hello", $user->device_token);
 
     }
 }	

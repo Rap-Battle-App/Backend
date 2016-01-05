@@ -44,15 +44,15 @@ class ControllerBattleRequestTest extends TestCase
         //need to send the logged in user as well. how?
         //check for the user4
         $this->get('/request')->seeJson([
-                {
+                //{
                     'requests'->'opponent'->'user_id' => $user1->id
-                },
+                /*},
                 {
                     'requests'->'opponent'->'user_id' => $user3->id
                 },
                 {
                     'requests'->'opponent'->'user_id' => $user2->id
-                }
+                }*/
             ]);
             }
 	

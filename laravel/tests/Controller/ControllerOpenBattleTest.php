@@ -13,10 +13,26 @@ class ControllerOpenBattleTest extends TestCase
      *
      * @return void
      */
-    public function testExample()
+    public function testGetBattle()
     {
-        /// TODO: write controller tests
-        $this->markTestIncomplete();
+        $battle = factory(App\Models\OpenBattle::class)->create();
+        
+        $this->get('/open-battle/{id}' , 'id'=> $battle->id)->seeJson([
+                
+                    'id' => $battle->id
+                
+            ]); 
     }
+    public function testPostRound()
+    {
+        $battle = factory(App\Models\OpenBattle::class)->create(['phase' => 1]);
+        
+        $this->get('/open-battle/{id}/round' , ['id'=> $battle->id , 'beat_id'=>2 , 'video'=>"abc.mp4"])->seeJson([
+                
+                    'phase' => 2
+                
+            ]); 
+    }
+
 
 }

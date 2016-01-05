@@ -34,9 +34,9 @@ class ControllerUserTest extends TestCase
         //echo $user->id;
 
         $this->get('/user/{id}', ['id' => $user->id])->seeJson([
-                {
+                
                     'rating' => 3
-                }
+                
             ]);
             
     }
@@ -85,9 +85,9 @@ class ControllerUserTest extends TestCase
         //echo $user->notifications;
 
         $this->get('/account/settings')->seeJson([
-                {
+                
                     'rapper' => $user->rapper
-                }
+                
             ]);
 
         
