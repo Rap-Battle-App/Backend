@@ -4,7 +4,6 @@ use App\Http\Controllers\PasswordController;
 use App\Models\Battle;
 use App\Models\User;
 use Carbon\Carbon;
-use Hash;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
@@ -39,22 +38,23 @@ class ControllerPasswordTest extends TestCase
      */
     public function testPostReset()
     {
-        //$this->withoutMiddleware();
+        $password_old = 'password';
+        $password_new = 'password123';
 
-        // create users
-        $user = factory(App\Models\User::class)->create(['email' => 'testuser123@gmail.com',
-                'password' => "password",
-                'device_token' => "1q2w3e4r5t6y7u8i"]);
+        // create user
+        $user = factory(App\Models\User::class)->create(
+                ['email' => 'testuser123@gmail.com',
+                'password' => $password_old,
+                'device_token' => '1q2w3e4r5t6y7u8i']);
         
         $this->post('/password-recovery/reset',
                 ['email' => 'testuser123@gmail.com',
-                'token' => "1q2w3e4r5t6y7u8i",
-                'password' => "password123"]);
+                'password' => $password_new,
+                'token' => '1q2w3e4r5t6y7u8i']);
+
         //checking 
         //crypting to compare crypted password
-        $options = array('cost' => 15);
-        $new_password = "password123";
-        $this->assertEquals($user->password, password_hash($new_password,PASSWORD_BCRYPT,$options)); 
+        $this->assertEquals(bcrypt($password_new), $user->password); 
 
     }
 

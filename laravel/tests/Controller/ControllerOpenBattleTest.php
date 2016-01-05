@@ -17,7 +17,7 @@ class ControllerOpenBattleTest extends TestCase
     {
         $battle = factory(App\Models\OpenBattle::class)->create();
         
-        $this->get('/open-battle/{id}' , 'id'=> $battle->id)->seeJson([
+        $this->get('/open-battle/{id}' , ['id'=> $battle->id])->seeJson([
                 
                     'id' => $battle->id
                 

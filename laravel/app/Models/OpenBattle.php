@@ -44,9 +44,10 @@ class OpenBattle extends Model
     }
 
     /**
-     * Remove model from database
+     * Remove model from database and delete video files
      */
-    public function delete(){
+    public function delete()
+    {
         // clean filesystem
         Storage::disk('videos')->delete($this->rapper1_round1);
         Storage::disk('videos')->delete($this->rapper2_round1);
@@ -70,7 +71,7 @@ class OpenBattle extends Model
     }
 
     /**
-     *
+     * Gets the URL to a video file
      */
     private function makeRoundUrl($key)
     {

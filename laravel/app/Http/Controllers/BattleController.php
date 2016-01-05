@@ -126,7 +126,12 @@ class BattleController extends Controller
     public function getOpen(Request $request)
     {
         // get open battles by user
-        $battles = Auth::user()->openBattles(); //error by phpunit
+        $user = Auth::user();
+        if(is_null($user)){
+            $battles = collect();
+        } else {
+            $battles = $user->openBattles();
+        }
  
         $data = $this->createBattleOverview($battles->get());
 
@@ -147,6 +152,9 @@ class BattleController extends Controller
 
         $user = Auth::user();
         $battle = Battle::find($battle_id);
+
+        if(is_null($user)) return response('', 403); // forbidden
+        if(is_null($battle)) return response('', 404); // Not found
 
         // check if battle is votable
         if(!$battle->isOpenVoting()) return response('', 405); // Method not allowed
