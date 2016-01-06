@@ -92,8 +92,8 @@ class ControllerBattleTest extends TestCase
         //check possible conflicts with array
         $this->get('/battles/trending')
              ->seeJson([
-                'rapper1_id' => "$user1->id",
-                'rapper2_id' => "$user2->id",
+                'rapper1["user_id"]' => $user1->id,
+                'rapper2["user_id"]' => $user2->id,
                 'video' => '/path/to/file',
                 'votes_rapper1' => "10",
                 'votes_rapper2' => "11",
@@ -168,8 +168,8 @@ class ControllerBattleTest extends TestCase
         //using user id's to distinguish battles
         $this->get('/battles/open-voting')
              ->seeJson([
-                'rapper1_id' => "$user1->id",
-                'rapper2_id' => "$user2->id",
+                'rapper1["user_id"]' => "$user1->id",
+                'rapper2["user_id"]' => "$user2->id",
                 'video' => "/path/to/file",
                 
              ]);
@@ -254,7 +254,15 @@ class ControllerBattleTest extends TestCase
         $battle2->rapper1_round2 = "/path/to/rapper1_round2_b";
         $battle2->save();
         
-        $this->get('/battles/open')
+
+         $this->get('/battles/open')
+             ->seeJson([
+                'data["rapper1[user_id]"]' => "$user1->id",
+                
+
+                
+             ]);
+        /*$this->get('/battles/open')
              ->seeJson([
                 'rapper1_id' => "$user1->id",
                 'rapper2_id' => "$user2->id",
@@ -268,6 +276,7 @@ class ControllerBattleTest extends TestCase
 
                 
              ]);
+        */
         /*       
         $this->get('battles/open')
              ->seeJson([

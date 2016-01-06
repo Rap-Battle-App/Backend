@@ -40,17 +40,17 @@ class ControllerPasswordTest extends TestCase
     {
         $password_old = 'password';
         $password_new = 'password123';
-
+        $dev_tok = "1q2w3e4r5t6y7u8i";
         // create user
         $user = factory(App\Models\User::class)->create(
                 ['email' => 'testuser123@gmail.com',
                 'password' => $password_old,
-                'device_token' => '1q2w3e4r5t6y7u8i']);
+                'device_token' => $dev_tok]);
         
         $this->post('/password-recovery/reset',
                 ['email' => 'testuser123@gmail.com',
                 'password' => $password_new,
-                'token' => '1q2w3e4r5t6y7u8i']);
+                'token' => $dev_tok]);
 
         //checking 
         //crypting to compare crypted password

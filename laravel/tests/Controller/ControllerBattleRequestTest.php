@@ -45,7 +45,7 @@ class ControllerBattleRequestTest extends TestCase
         //check for the user4
         $this->get('/request')->seeJson([
                 //{
-                    'requests'->'opponent'->'user_id' => $user1->id
+                    'requests["opponent[user_id]"]' => $user1->id
                 /*},
                 {
                     'requests'->'opponent'->'user_id' => $user3->id
