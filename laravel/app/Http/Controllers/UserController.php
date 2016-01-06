@@ -85,6 +85,7 @@ class UserController extends Controller
     public function getSettings()
     {
         $user = Auth::user();
+        if(is_null($user)) return response('Unauthorized', 401);
         return $user->settings();
     }
 

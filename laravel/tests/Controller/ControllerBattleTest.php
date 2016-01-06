@@ -33,12 +33,16 @@ class ControllerBattleTest extends TestCase
         $battle->votes_rapper2 = 86;
         $battle->save();
 
-        // TODO: authenticate user
-
-        $this->get('/battle/' . $battle->id)->seeJSON([
-                'rapper1_id' => (string) $user1->id,
-                'rapper2_id' => (string) $user2->id,
-                'video' => $battle->video,
+        $this->actingAs($user1)->get('/battle/' . $battle->id)->seeJSON([
+                'rapper1' => [
+                    'user_id' => (string) $user1->id,
+                    'username' => $user1->username,
+                    'profile_picture' => $user1->picture],
+                'rapper2' => [
+                    'user_id' => (string) $user2->id,
+                    'username' => $user2->username,
+                    'profile_picture' => $user2->picture],
+                'video_url' => $battle->video,
                 'votes_rapper1' => (string) $battle->votes_rapper1,
                 'votes_rapper2' => (string) $battle->votes_rapper2]);
     }
@@ -208,9 +212,7 @@ class ControllerBattleTest extends TestCase
         $battle2->rapper1_round2 = "/path/to/rapper1_round2_b";
         $battle2->save();
 
-        // TODO: authenticate user
-                
-        $this->get('/battles/open')->seeJson([
+        $this->actingAs($user1)->get('/battles/open')->seeJson([
                 'current_page' => 1,
                 'data' => [
                     [ // first battle
@@ -248,14 +250,16 @@ class ControllerBattleTest extends TestCase
         $battle = new Battle;
         $battle->rapper1_id = $user1->id;
         $battle->rapper2_id = $user2->id;
-        $battle->votes_rapper1 = 2;
-        $battle->votes_rapper2 = 5;
+        $battle->votes_rapper1 = 0;
+        $battle->votes_rapper2 = 0;
         $battle->save();
         
-        $this->post('/battle/' . $battle->id . '/vote', ['rapper_number' => 1]);
+        $this->actingAs($user1)->post('/battle/' . $battle->id . '/vote', ['rapper_number' => 1]);
 
-        //the voting user does not exists, possibly failed raising votes
         // TODO: check if vote exists
-        $this->assertEquals(2, $battle->votes_rapper1);
+        $this->assertEquals(1, $battle->votes()->count());
+
+        $this->assertEquals(0, $battle->votes_rapper1);
+        $this->assertEquals(1, $battle->votes_rapper2);
     }	
 }

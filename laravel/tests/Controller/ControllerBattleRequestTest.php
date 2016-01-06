@@ -31,18 +31,15 @@ class ControllerBattleRequestTest extends TestCase
         
         //created some battle request towards the user4
         $battleRequest1 = factory(App\Models\BattleRequest::class)->create(['challenger_id' => $user1->id ,'challenged_id' => $user4->id]);
-        $battleRequest2 = factory(App\Models\BattleRequest::class)->create(['challenger_id' => $user3->id ,'challenged_id' => $user4->id]);
-        $battleRequest3 = factory(App\Models\BattleRequest::class)->create(['challenger_id' => $user2->id ,'challenged_id' => $user4->id]);
-        $battleRequest4 = factory(App\Models\BattleRequest::class)->create(['challenger_id' => $user3->id ,'challenged_id' => $user1->id]);
-
-
-        // TODO: authenticate user
+//        $battleRequest2 = factory(App\Models\BattleRequest::class)->create(['challenger_id' => $user3->id ,'challenged_id' => $user4->id]);
+//        $battleRequest3 = factory(App\Models\BattleRequest::class)->create(['challenger_id' => $user2->id ,'challenged_id' => $user4->id]);
+//        $battleRequest4 = factory(App\Models\BattleRequest::class)->create(['challenger_id' => $user3->id ,'challenged_id' => $user1->id]);
 
         //check for the user4
-        $this->get('/requests')->seeJson([
-                'requests' => ['id' => $battleRequest1->id,
-                        'date' => $battleRequest1->creation_date,
-                        'opponent' => ['user_id' => $user4->id,
+        $this->actingAs($user1)->get('/requests')->seeJson([
+                'requests' => ['id' => (string) $battleRequest1->id,
+                        //'date' => $battleRequest1->creation_date, // TODO: use carbon to convert the date to the right format
+                        'opponent' => ['user_id' => (string) $user4->id,
                                 'username' => $user4->username,
                                 'profile_picture' => $user4->picture]]
                 ]);
@@ -56,11 +53,11 @@ class ControllerBattleRequestTest extends TestCase
         $user1 = factory(App\Models\User::class)->create();
         $user2 = factory(App\Models\User::class)->create();
 
-        // TODO: authenticate user1
+        $this->actingAs($user1)->post('/request', ['user_id' => $user2->id]);
 
-        $this->post('/request', ['user_id' => $user2->id]);
         //getting the entry from the battle_request table to verify
         $br = BattleRequest::where('challenger_id', $user1->id)->first(); 
+
         //comparing it with the new entry created in the battle_request table
         $this->assertNotNull($br);
         $this->assertEquals($user1->id, $br->challenger_id);         
@@ -80,10 +77,8 @@ class ControllerBattleRequestTest extends TestCase
         $br->challenged_id = $user2->id;
         $br->save();
 
-        // TODO: authenticate user
-
         // execute postAnswer()
-        $this->post('/request/' . $br->id , ['accepted' == TRUE]);
+        $this->actingAs($user1)->post('/request/' . $br->id , ['accepted' == TRUE]);
         $oP = OpenBattle::find($br->challenger_id);
 
         //checking the output
@@ -100,15 +95,13 @@ class ControllerBattleRequestTest extends TestCase
         //$this->withoutMiddleware();
         $user1 = factory(App\Models\User::class)->create(['rating' => 3]);
         $user2 = factory(App\Models\User::class)->create(['rating' => 4]);
-        $user3 = factory(App\Models\User::class)->create(['rating' => 5]);
-        $user4 = factory(App\Models\User::class)->create(['rating' => 6]);
-        $user5 = factory(App\Models\User::class)->create(['rating' => 5]);
-        $user6 = factory(App\Models\User::class)->create(['rating' => 4]);
+//        $user3 = factory(App\Models\User::class)->create(['rating' => 5]);
+//        $user4 = factory(App\Models\User::class)->create(['rating' => 6]);
+//        $user5 = factory(App\Models\User::class)->create(['rating' => 5]);
+//        $user6 = factory(App\Models\User::class)->create(['rating' => 4]);
 
-        // TODO: authenticate user
-
-        $this->get('/request/random')->seeJson([
-                    'opponent' => ['user_id' => $user2->id,
+        $this->actingAs($user1)->get('/request/random')->seeJson([
+                    'opponent' => ['user_id' => (string) $user2->id,
                             'username' => $user2->username,
                             'profile_picture' => $user2->picture]
                     ]);
