@@ -209,48 +209,32 @@ class ControllerBattleTest extends TestCase
         $battle2->save();
 
         // TODO: authenticate user
-        
-        $this->get('/battles/open')
-             ->seeJson([
-                'rapper1_id' => "$user1->id",
-                'rapper2_id' => "$user2->id",
-                'phase' => '1',
-                'beat1_id' => '1',
-                'rapper1_round1' => "/path/to/rapper1_round1",
-                'rapper2_round2' => "/path/to/rapper2_round2",
-                'beat2_id' => '2',
-                'rapper2_round1' => "/path/to/rapper2_round1",
-                'rapper1_round2' => "/path/to/rapper1_round2"
-
                 
-             ]);
-        /*       
-        $this->get('battles/open')
-             ->seeJson([
-                {'rapper1_id' => $user1->id,
-                'rapper2_id' => $user2->id,
-                'phase' => 1,
-                'beat1_id' => 1,
-                'rapper1_round1' => "/path/to/rapper1_round1",
-                'rapper2_round2' => "/path/to/rapper2_round2",
-                'beat2_id' => 2,
-                'rapper2_round1' => "/path/to/rapper2_round1",
-                'rapper1_round2' => "/path/to/rapper1_round2"},
-
-                {'rapper1_id' => $user1->id,
-                'rapper2_id' => $user2->id,
-                'phase' => 2,
-                'beat1_id' => 2,
-                'rapper1_round1' => "/path/to/rapper1_round1_b",
-                'rapper2_round2' => "/path/to/rapper2_round2_b",
-                'beat2_id' => 1,
-                'rapper2_round1' => "/path/to/rapper2_round1_b",
-                'rapper1_round2' => "/path/to/rapper1_round2_b"}
-
-                
-             ]);
-         */
-    }	
+        $this->get('/battles/open')->seeJson([
+                'current_page' => 1,
+                'data' => [
+                    [ // first battle
+                    'battle_id' => (string) $battle1->id,
+                    'rapper1' => [
+                        'user_id' => (string) $user1->id,
+                        'username' => $user1->username,
+                        'profile_picture' => $user1->picture],
+                    'rapper2' => [
+                        'user_id' => (string) $user2->id,
+                        'username' => $user2->username,
+                        'profile_picture' => $user2->picture]],
+                    [ // second battle
+                    'battle_id' => (string) $battle2->id,
+                    'rapper1' => [
+                        'user_id' => (string) $user1->id,
+                        'username' => $user1->username,
+                        'profile_picture' => $user1->picture],
+                    'rapper2' => [
+                        'user_id' => (string) $user2->id,
+                        'username' => $user2->username,
+                        'profile_picture' => $user2->picture]]
+                ]]);
+    }
 
     /**
      * Test for postVote
@@ -260,9 +244,6 @@ class ControllerBattleTest extends TestCase
         $user1 = factory(App\Models\User::class)->create();
         $user2 = factory(App\Models\User::class)->create();
 
-
-
-
         // create two battles
         $battle = new Battle;
         $battle->rapper1_id = $user1->id;
@@ -271,14 +252,10 @@ class ControllerBattleTest extends TestCase
         $battle->votes_rapper2 = 5;
         $battle->save();
         
-
-
-        $this->post('/battle/{id}/vote', ['id' => $battle->id, 'rapper_number' => 1]);
+        $this->post('/battle/' . $battle->id . '/vote', ['rapper_number' => 1]);
 
         //the voting user does not exists, possibly failed raising votes
+        // TODO: check if vote exists
         $this->assertEquals(2, $battle->votes_rapper1);
-
-             
     }	
-
 }

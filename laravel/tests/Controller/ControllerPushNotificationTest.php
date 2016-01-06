@@ -23,9 +23,9 @@ class PushNotificationControllerTest extends TestCase
     {
         $user = factory(App\Models\User::class)->create();
 
-        $this->post('/device-token', ['token' => 'hello']);
+        $this->post('/device-token', ['token' => "hello"]);
 
         //checking the updation
-        $this->assertEquals('hello', $user->device_token);
+        $this->assertEquals("hello", $user->device_token);
     }
 }	
