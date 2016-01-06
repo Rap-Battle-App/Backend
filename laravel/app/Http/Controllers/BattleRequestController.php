@@ -29,6 +29,7 @@ class BattleRequestController extends Controller
     public function getRequests()
     {
         $user = Auth::user();
+        if(is_null($user)) return response('Unauthorized', 401);
 
         $requests = $user->battleRequestsChallenger()->get();
         $requestsOpponent = $user->battleRequestsChallenged()->get();
@@ -90,10 +91,13 @@ class BattleRequestController extends Controller
             'accepted' => 'required|boolean'
         ]);
 
+        $user = Auth::user();
+        if(is_null($user)) return response('Unauthorized', 401);
+
         $battleRequest = BattleRequest::findOrFail($id);
 
         // Check if authenticated user is challenged user
-        if ($battleRequest->challenged_id == $request->user()->id) {
+        if ($battleRequest->challenged_id == $user->id) {
             if ($request->input('accepted')) {
                 $battle = new OpenBattle;
                 $battle->start($battleRequest->challenger, $battleRequest->challenged);
@@ -101,7 +105,7 @@ class BattleRequestController extends Controller
             }
             $battleRequest->delete();
         } else {
-            return response('Unauthorized.', 401);
+            return response('Unauthorized', 401);
         }
     }
 
@@ -113,6 +117,7 @@ class BattleRequestController extends Controller
     public function getRandomOpponent()
     {
         $user = Auth::user();
+        if(is_null($user)) return response('Unauthorized', 401);
         // Number of possible opponents = Number of rappers - 1 (Authenticated user)
         //     - Number of open battles of authenticated user
         //     - Number of battle requests of authenticated user

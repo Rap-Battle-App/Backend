@@ -19,6 +19,7 @@ class BattleController extends Controller
     {
         $battle = Battle::findOrFail($id);
         $user = Auth::user();
+        if(is_null($user)) return response('Unauthorized', 401);
 
         $profilePreview1 = array(
             'user_id' => $battle->rapper1_id,
