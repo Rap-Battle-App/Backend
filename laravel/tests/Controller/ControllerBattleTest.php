@@ -19,10 +19,6 @@ class ControllerBattleTest extends TestCase
      *	Testing the BattleController
      * 
      */
-
-    //todo: correct api response format
-
-
     public function testGetBattle()
     {
         //$this->withoutMiddleware();
@@ -30,110 +26,62 @@ class ControllerBattleTest extends TestCase
         $user2 = factory(App\Models\User::class)->create(['rating' => 10]);
 
         $battle = new Battle;
-        //just experimenting
-        //$battle->id = 93102; 
         $battle->rapper1_id = $user1->id;
         $battle->rapper2_id = $user2->id;
-        $battle->video = "/path/to/file";
+        $battle->video = '/path/to/file';
         $battle->votes_rapper1 = 45;
         $battle->votes_rapper2 = 86;
         $battle->save();
-        //echo $battle->id;
 
+        // TODO: authenticate user
 
-
-        $this->get('/battle/{id}', ['id' => $battle->id]);
-             //->seeJson([
-                //'rapper1_id' => "$user1->id",
-                //'rapper2_id' => "$user2->id",
-                //'video' => "/path/to/file",
-                //'votes_rapper1' => 45,
-                //'votes_rapper2' => 86,
-             //]);
-        /*$this->get('battle/{id}', ['id' => $battle->id])
-             ->seeJson([
-                'rapper1_id' => $user1->id,
-                'rapper2_id' => $user2->id,
-                'video' => "/path/to/file",
-                'votes_rapper1' => 45,
-                'votes_rapper2' => 86
-             ]);
-        */
-        // TODO: remove this after finishing the test above:
-        $this->markTestIncomplete();
+        $this->get('/battle/' . $battle->id)->seeJSON([
+                'rapper1_id' => (string) $user1->id,
+                'rapper2_id' => (string) $user2->id,
+                'video' => $battle->video,
+                'votes_rapper1' => (string) $battle->votes_rapper1,
+                'votes_rapper2' => (string) $battle->votes_rapper2]);
     }
-	
     
     /**
      * Test for getTrending
      */
     public function testGetTrending()
     {
-        //$this->withoutMiddleware();
-
         // create users
         $user1 = factory(App\Models\User::class)->create();
         $user2 = factory(App\Models\User::class)->create();
+
+        $battle = array();
+        $data = array();
         // create battles
         for($i = 0; $i < 10; ++$i){
-            $battle = new Battle;
-            $battle->rapper1_id = $user1->id;
-            $battle->rapper2_id = $user2->id;
-            $battle->video = "/path/to/file";
-            $battle->votes_rapper1 = ($i+1);
-            $battle->votes_rapper2 = ($i+2);
-            $battle->save();
+            $battle[$i] = new Battle;
+            $battle[$i]->rapper1_id = $user1->id;
+            $battle[$i]->rapper2_id = $user2->id;
+            $battle[$i]->video = '/path/to/file';
+            $battle[$i]->votes_rapper1 = ($i+1);
+            $battle[$i]->votes_rapper2 = ($i+2);
+            $battle[$i]->save();
+
+            $data[] = [
+                    'battle_id' => (string) $battle[$i]->id,
+                    'rapper1' => [
+                        'user_id' => (string) $user1->id,
+                        'username' => $user1->username,
+                        'profile_picture' => $user1->picture],
+                    'rapper2' => [
+                        'user_id' => (string) $user2->id,
+                        'username' => $user2->username,
+                        'profile_picture' => $user2->picture]
+                    ];
         }
 
-        //check trending battle count
-        $trendingcnt = config('rap-battle.trendingcnt', 5);
- 
-
         //check possible conflicts with array
-        $this->get('/battles/trending')
-             ->seeJson([
-                'rapper1_id' => "$user1->id",
-                'rapper2_id' => "$user2->id",
-                'video' => '/path/to/file',
-                'votes_rapper1' => "10",
-                'votes_rapper2' => "11",
-
-             ]);
-         /*
-        $this->get('battles/trending')
-             ->seeJson([
-                {'rapper1_id' => $user1->id,
-                'rapper2_id' => $user2->id,
-                'video' => "/path/to/file",
-                'votes_rapper1' => 11,
-                'votes_rapper2' => 12},
-
-                {'rapper1_id' => $user1->id,
-                'rapper2_id' => $user2->id,
-                'video' => "/path/to/file",
-                'votes_rapper1' => 10,
-                'votes_rapper2' => 11},
-
-                {'rapper1_id' => $user1->id,
-                'rapper2_id' => $user2->id,
-                'video' => "/path/to/file",
-                'votes_rapper1' => 9,
-                'votes_rapper2' => 10},
-
-                {'rapper1_id' => $user1->id,
-                'rapper2_id' => $user2->id,
-                'video' => "/path/to/file",
-                'votes_rapper1' => 8,
-                'votes_rapper2' => 9},
-
-                {'rapper1_id' => $user1->id,
-                'rapper2_id' => $user2->id,
-                'video' => "/path/to/file",
-                'votes_rapper1' => 7,
-                'votes_rapper2' => 8}
-
-             ]);
-*/
+        $this->get('/battles/trending')->seeJson([
+                'current_page' => 1,
+                'data' => $data
+        ]);
     }
 
     /**
@@ -165,15 +113,20 @@ class ControllerBattleTest extends TestCase
         $battle2->created_at = $timeoldest->toDateTimeString();
         $battle2->save(); 
 
-        //using user id's to distinguish battles
-        $this->get('/battles/open-voting')
-             ->seeJson([
-                'rapper1_id' => "$user1->id",
-                'rapper2_id' => "$user2->id",
-                'video' => "/path/to/file",
-                
-             ]);
-
+        $this->get('/battles/open-voting')->seeJson([
+                'current_page' => 1,
+                'data' => [[
+                    'battle_id' => (string) $battle1->id,
+                    'rapper1' => [
+                        'user_id' => (string) $user1->id,
+                        'username' => $user1->username,
+                        'profile_picture' => $user1->picture],
+                    'rapper2' => [
+                        'user_id' => (string) $user2->id,
+                        'username' => $user2->username,
+                        'profile_picture' => $user2->picture]
+                ]]
+        ]);
     }
 
     /**
@@ -205,19 +158,20 @@ class ControllerBattleTest extends TestCase
         $battle2->created_at = $timeoldest->toDateTimeString();
         $battle2->save(); 
 
-        //check trending battle count
-        $trendingcnt = config('rap-battle.trendingcnt', 5);
-
-        //using user id's to distinguish battles
-        $this->get('/battles/completed')
-             ->seeJson([
-                //'rapper1_id' => "$user3->id",
-                //'rapper2_id' => "$user4->id",
-                //'video' => '/path/to/file',
-                
-             ]);
-        //testing the return values does not work at the moment, is ok
-
+        $this->get('/battles/completed')->seeJson([
+                'current_page' => 1,
+                'data' => [[
+                    'battle_id' => (string) $battle2->id,
+                    'rapper1' => [
+                        'user_id' => (string) $user3->id,
+                        'username' => $user3->username,
+                        'profile_picture' => $user3->picture],
+                    'rapper2' => [
+                        'user_id' => (string) $user4->id,
+                        'username' => $user4->username,
+                        'profile_picture' => $user4->picture]
+                ]]
+        ]);
     }	
 
     /**
@@ -253,6 +207,8 @@ class ControllerBattleTest extends TestCase
         $battle2->rapper2_round1 = "/path/to/rapper2_round1_b";
         $battle2->rapper1_round2 = "/path/to/rapper1_round2_b";
         $battle2->save();
+
+        // TODO: authenticate user
         
         $this->get('/battles/open')
              ->seeJson([
