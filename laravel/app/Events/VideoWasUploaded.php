@@ -30,7 +30,7 @@ class VideoWasUploaded extends Event
      *
      * @return void
      */
-    public function __construct($outfile, $infiles, $deleteOnSuccess = false, $followingEvent)
+    public function __construct($outfile, $infiles, $deleteOnSuccess = false, $followingEvent = null)
     {
         if(!is_array($infiles)) $infiles = [$infiles];
 
