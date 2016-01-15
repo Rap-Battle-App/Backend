@@ -93,4 +93,9 @@ return [
     // 'ffmpeg_timeout' => '3600',
     // 'ffmpeg_threads' => '12',
 
+
+    // Phase times in hours.
+    'phase1time' => 24,
+    'phase2time' => 24
+
 ];

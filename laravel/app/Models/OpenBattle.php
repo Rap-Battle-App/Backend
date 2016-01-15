@@ -17,6 +17,13 @@ class OpenBattle extends Model
                             'rapper2_round1', 'rapper1_round2', 'rapper2_round2'];
 
     /**
+     * The attributes that should be mutated to dates.
+     *
+     * @var array
+     */
+    protected $dates = ['phase_start'];
+
+    /**
      * Set the phase while updating the timer.
      */
     public function setPhaseAttribute($phase)
@@ -87,7 +94,7 @@ class OpenBattle extends Model
         $opponent = 'rapper'.($rapperNumber == 1 ? 2 : 1);
 
         $phaseInfo = [
-            //'time_left' => ,//todo
+            'time_left' => config('rap-battle.phase'.$this->phase.'time') * 3600 - $this->phase_start->diffInSeconds(),
             'round1_url' => $this->makeRoundUrl($rapper.'_round1')
         ];
 
