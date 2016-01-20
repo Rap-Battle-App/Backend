@@ -9,6 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Events\VideoWasUploaded;
 use FFMpeg;
 use FFMpeg\Media\Video;
+use FFMpeg\Filters\Audio\SimpleFilter;
 use FFMpeg\Filters\Video\ConcatFilter;
 use FFMpeg\Filters\Video\ResizeFilter;
 use FFMpeg\Coordinate\Dimension;
@@ -56,7 +57,6 @@ class ConvertVideo implements ShouldQueue
             
             $ffmpeg = FFMpeg\FFMpeg::create($conf);
 
-
             // create video objects
             foreach($event->infiles as $file){
                 $videos[] = $ffmpeg->open($file);
@@ -83,6 +83,10 @@ class ConvertVideo implements ShouldQueue
                     $concatfilter->addVideo($videos[$i]);
                 }
             }
+
+            // create simple filter to add '-movflags faststart' parameter (to enable streaming)
+            $movflags = SimpleFilter(array('-movflags', 'faststart'));
+            $videos[0]->addFilter($movflags);
 
             // set video format
             $format = new FFMpeg\Format\Video\X264('libmp3lame');
