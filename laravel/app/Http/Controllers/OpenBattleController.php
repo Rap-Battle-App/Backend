@@ -10,6 +10,7 @@ use App\Models\Battle;
 use App\Models\User;
 use App\Events\VideoWasUploaded;
 use App\Events\OpenBattleVideoConverted;
+use Log;
 
 class OpenBattleController extends Controller
 {
@@ -69,7 +70,7 @@ class OpenBattleController extends Controller
             return response('Unauthorized.', 401);
         }
 
-        // TODO: check video file
+        // TODO: check video file?
 
         // Name of the column the video needs to be saved in
         $videoColumn = 'rapper'.$rapperNumber.'_round'.$battle->phase;
@@ -80,6 +81,12 @@ class OpenBattleController extends Controller
         $videoFilename = $videoName.'.mp4'; // target file format: mp4
         $videoFilenameTmp = $videoName;
         Storage::disk('videos')->put($videoFilenameTmp, file_get_contents($video->getRealPath()));
+
+        Log::info('Uploading video', ['rapperNumber' => $rapperNumber,
+                                    'phase' => $battle->phase,
+                                    'userID' => $user->id,
+                                    'videoFilenameTmp' => $videoFilenameTmp,
+                                    'videoFilename' => $videoFilename]);
 
         // convert video/fire events and delete temporary file
         $inFilePath = Storage::disk('videos')->getAdapter()->applyPathPrefix($videoFilenameTmp);
