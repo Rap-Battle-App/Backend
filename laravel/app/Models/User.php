@@ -283,7 +283,7 @@ class User extends Model implements AuthenticatableContract,
         return [
             'user_id' => $this->id,
             'username' => $this->username,
-            'profile_picture' => $this->picture
+            'profile_picture' => $this->getProfilePictureAttribute()
         ];
     }
 
@@ -297,7 +297,7 @@ class User extends Model implements AuthenticatableContract,
         return [
             'id' => $this->id,
             'username' => $this->username,
-            'profile_picture' => $this->picture,
+            'profile_picture' => $this->getProfilePictureAttribute(),
             'city' => $this->city,
             'about_me' => $this->about_me,
             'statistics' => ['wins' => $this->wins, 'defeats' => $this->defeats],
