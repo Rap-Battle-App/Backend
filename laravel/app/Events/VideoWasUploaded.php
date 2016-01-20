@@ -5,6 +5,7 @@ namespace App\Events;
 use App\Events\Event;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Log;
 
 /**
  * This Event calls the video conversion listener which will convert (and
@@ -38,6 +39,10 @@ class VideoWasUploaded extends Event
         $this->infiles = $infiles;
         $this->deleteOnSuccess = $deleteOnSuccess;
         $this->followingEvent = $followingEvent;
+
+        Log::info('Video conversion event created', ['infiles' => $infiles,
+                                                    'outfile' => $outfile,
+                                                    'deleteOnSuccess' => $deleteOnSuccess]);
     }
 
     /**

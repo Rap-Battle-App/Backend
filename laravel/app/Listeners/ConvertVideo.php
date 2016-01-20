@@ -40,6 +40,9 @@ class ConvertVideo implements ShouldQueue
      */
     public function handle(VideoWasUploaded $event)
     {
+        Log::info('Calling video conversion handler', ['infiles' => $event->infiles,
+                                                    'outfile' => $event->outfile]);
+
         if(empty($event->outfile) || empty($event->infiles)){
             throw new InvalidArgumentException('No video files given');
         } else {
@@ -100,12 +103,15 @@ class ConvertVideo implements ShouldQueue
 
             // convert / concatenate video
             try {
+                Log::info('Starting video conversion', ['infiles' => $event->infiles,
+                                                        'outfiles' => $event->outfile]);
+
                 $videos[0]->save($format, $event->outfile);
             } catch(Exception $e){
                 // TODO: handle exception: video could not be converted / concatenated
                 Log::error('Video conversion failed', ['exception' => $e->getMessage(),
-                                                    ['infiles' => $event->infiles],
-                                                    ['outfile' => $event->outfile]]);
+                                                    'infiles' => $event->infiles,
+                                                    'outfile' => $event->outfile]);
                 return true;
                 //throw $e;
             }
