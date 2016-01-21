@@ -44,8 +44,8 @@ class UpdateOpenBattle
             $infiles = array();
             $infiles[] = Storage::disk('videos')->getAdapter()->applyPathPrefix($event->battle->rapper1_round1);
             $infiles[] = Storage::disk('videos')->getAdapter()->applyPathPrefix($event->battle->rapper2_round1);
-            $infiles[] = Storage::disk('videos')->getAdapter()->applyPathPrefix($event->battle->rapper1_round2);
             $infiles[] = Storage::disk('videos')->getAdapter()->applyPathPrefix($event->battle->rapper2_round2);
+            $infiles[] = Storage::disk('videos')->getAdapter()->applyPathPrefix($event->battle->rapper1_round2);
 
             // new video file name
             $this->outfilename = '' . $event->battle->id . '.mp4';
