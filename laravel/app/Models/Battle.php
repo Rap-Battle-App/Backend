@@ -15,23 +15,6 @@ class Battle extends Model
      */
     protected $fillable = ['rapper1_id', 'rapper2_id', 'video', 'votes_rapper1', 'votes_rapper2'];
 
-
-    /**
-     * Get the battle in a specific format
-     
-    public function getMyBattle()
-    {
-        return [
-            'rapper1_id' => $this->rapper1_id,
-            'rapper2_id' => $this->rapper2_id,
-            'video' => $this->video,
-            'votes_rapper1' => $this->votes_rapper1,
-            'votes_rapper2' => $this->votes_rapper2,
-            'statistics' => ['wins' => $this->wins, 'defeats' => $this->defeats],
-            'rapper' => $this->rapper
-        ];
-    }*/
-
     /**
      * Get the user rapper 1
      */

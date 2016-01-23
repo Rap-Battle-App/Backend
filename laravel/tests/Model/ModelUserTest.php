@@ -262,15 +262,6 @@ class ModelUserTest extends TestCase
     }
 
     /**
-     * Test for getProfile()
-     */
-    public function testGetProfilePictureAttribute()
-    {
-        // TODO
-        $this->markTestIncomplete();
-    }
-
-    /**
      * Test for scopeNamedLike()
      */
     public function testScopeNamedLike()
@@ -299,7 +290,7 @@ class ModelUserTest extends TestCase
 
         $this->assertEquals(['user_id' => $user->id,
                 'username' => $user->username,
-                'profile_picture' => $user->picture],
+                'profile_picture' => $user->getProfilePictureAttribute()],
                 $user->profilePreview());
     }
 
@@ -312,7 +303,7 @@ class ModelUserTest extends TestCase
 
         $this->assertEquals(['id' => $user->id,
                 'username' => $user->username,
-                'profile_picture' => $user->picture,
+                'profile_picture' => $user->getProfilePictureAttribute(),
                 'city' => $user->city,
                 'about_me' => $user->about_me,
                 'statistics' => ['wins' => $user->wins, 'defeats' => $user->defeats],

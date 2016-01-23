@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Carbon\Carbon;
 
 use App\Models\OpenBattle;
 
@@ -37,7 +38,7 @@ class ModelOpenBattleTest extends TestCase
         // check if it is in database
         $this->seeInDatabase('open_battles', ['rapper1_id' => $user1->id,
                                             'rapper2_id' => $user2->id,
-                                            'phase' => 2,
+//                                            'phase' => 2,
                                             'beat1_id' => 1,
                                             'beat2_id' => 2,
                                             'rapper1_round1' => '/somewhere/somefile',
@@ -84,5 +85,31 @@ class ModelOpenBattleTest extends TestCase
 
         $this->assertTrue($openBattle4->hasFirstRounds());
         $this->assertTrue($openBattle4->hasAllRounds());
+    }
+
+    public function testIsOpen(){
+        $battle11 = factory(App\Models\OpenBattle::class)->create();
+        $battle12 = factory(App\Models\OpenBattle::class)->create();
+        $battle21 = factory(App\Models\OpenBattle::class)->create();
+        $battle22 = factory(App\Models\OpenBattle::class)->create();
+        $battle3 = factory(App\Models\OpenBattle::class)->create();
+
+        $battle11->setPhaseAttribute(1);
+        $battle21->setPhaseAttribute(2);
+        $battle3->setPhaseAttribute(3);
+
+        $now = Carbon::now();
+
+        Carbon::setTestNow(Carbon::now()->subHours(config('rap-battle.phase1time', 24) + 1));
+        $battle12->setPhaseAttribute(1);
+        Carbon::setTestNow(Carbon::now()->subHours(config('rap-battle.phase2time', 24) + 1));
+        $battle22->setPhaseAttribute(2);
+
+        Carbon::setTestNow($now);
+        $this->assertTrue($battle11->isOpen());
+        $this->assertTrue($battle21->isOpen());
+        $this->assertFalse($battle12->isOpen());
+        $this->assertFalse($battle22->isOpen());
+        $this->assertFalse($battle3->isOpen());
     }
 }

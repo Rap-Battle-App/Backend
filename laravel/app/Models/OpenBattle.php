@@ -28,10 +28,25 @@ class OpenBattle extends Model
      */
     public function setPhaseAttribute($phase)
     {
-        $this->attributes['phase'] = $phase;
-        $this->attributes['phase_start'] = Carbon::now();
+        $this->phase = $phase;
+        $this->phase_start = Carbon::now()->toDateTimeString();
 
         //TODO start phase timer
+    }
+
+    /**
+     * Returns true, if the OpenBattle is open
+     */
+    public function isOpen(){
+        $start = Carbon::parse($this->phase_start);
+
+        if($this->phase == 1){
+            $startMin = Carbon::now()->subHours(config('rap-battle.phase1time', 24));
+            return $start->gt($startMin);
+        } else if($this->phase == 2){
+            $startMin = Carbon::now()->subHours(config('rap-battle.phase2time', 24));
+            return $start->gt($startMin);
+        } else return false;
     }
 
     /**
@@ -74,7 +89,7 @@ class OpenBattle extends Model
     {
         $this->rapper1()->associate($rapper1);
         $this->rapper2()->associate($rapper2);
-        $this->phase = 1;
+        $this->setPhaseAttribute(1);
     }
 
     /**

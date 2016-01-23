@@ -37,6 +37,8 @@ class OpenBattleController extends Controller
         $battle = OpenBattle::findOrFail($id);
         $user = Auth::user();
 
+        if(!$battle->isOpen()) return response('Gone', 410);
+
         if ($user == $battle->rapper1) {
             $battle = $battle->toJSON_Rapper1();
         } elseif ($user == $battle->rapper2) {
@@ -59,6 +61,8 @@ class OpenBattleController extends Controller
         // get battle and user instances
         $battle = OpenBattle::findOrFail($id);
         $user = $request->user();
+
+        if(!$battle->isOpen()) return response('Gone', 410);
 
         // get rapper number
         $rapperNumber = 0;
