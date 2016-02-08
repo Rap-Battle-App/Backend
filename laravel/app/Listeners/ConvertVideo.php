@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Events\SomeEvent;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Log;
 
 use App\Events\VideoWasUploaded;
 use FFMpeg;
@@ -88,7 +89,7 @@ class ConvertVideo implements ShouldQueue
             }
 
             // create simple filter to add '-movflags faststart' parameter (to enable streaming)
-            $movflags = SimpleFilter(array('-movflags', 'faststart'));
+            $movflags = new SimpleFilter(array('-movflags', 'faststart'));
             $videos[0]->addFilter($movflags);
 
             // set video format
