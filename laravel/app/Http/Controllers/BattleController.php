@@ -131,7 +131,7 @@ class BattleController extends Controller
         if(is_null($user)){
             $battles = collect();
         } else {
-            $battles = $user->openBattles();
+            $battles = $user->openBattles()->open();
         }
  
         $data = $this->createBattleOverview($battles->get());

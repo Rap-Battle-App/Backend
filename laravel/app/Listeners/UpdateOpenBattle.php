@@ -36,7 +36,7 @@ class UpdateOpenBattle
             $event->battle['beat'.$event->rapperNumber.'_id'] = $event->beatId;
             // Go to phase 2 if both 1st rounds are uploaded
             if ($event->battle->hasFirstRounds()) {
-                $event->battle->phase++;
+                $event->battle->setPhaseAttribute(2);
             }
         } else if ($event->battle->phase == 2 && $event->battle->hasAllRounds()) {
             // note: battle done, concat video, create battle, delete open battle - maybe need to do this when conversion is done

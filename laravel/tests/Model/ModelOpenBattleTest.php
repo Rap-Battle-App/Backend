@@ -87,29 +87,42 @@ class ModelOpenBattleTest extends TestCase
         $this->assertTrue($openBattle4->hasAllRounds());
     }
 
+    /**
+     * Test for isOpen() and scopeOpen()
+     */
     public function testIsOpen(){
         $battle11 = factory(App\Models\OpenBattle::class)->create();
         $battle12 = factory(App\Models\OpenBattle::class)->create();
         $battle21 = factory(App\Models\OpenBattle::class)->create();
         $battle22 = factory(App\Models\OpenBattle::class)->create();
-        $battle3 = factory(App\Models\OpenBattle::class)->create();
+        //$battle3 = factory(App\Models\OpenBattle::class)->create();
 
         $battle11->setPhaseAttribute(1);
         $battle21->setPhaseAttribute(2);
-        $battle3->setPhaseAttribute(3);
+        //$battle3->setPhaseAttribute(3);
+        $battle11->save();
+        $battle21->save();
+        //$battle3->save();
 
         $now = Carbon::now();
 
         Carbon::setTestNow(Carbon::now()->subHours(config('rap-battle.phase1time', 24) + 1));
         $battle12->setPhaseAttribute(1);
+        $battle12->save();
         Carbon::setTestNow(Carbon::now()->subHours(config('rap-battle.phase2time', 24) + 1));
         $battle22->setPhaseAttribute(2);
+        $battle22->save();
 
         Carbon::setTestNow($now);
         $this->assertTrue($battle11->isOpen());
         $this->assertTrue($battle21->isOpen());
         $this->assertFalse($battle12->isOpen());
         $this->assertFalse($battle22->isOpen());
-        $this->assertFalse($battle3->isOpen());
+        //$this->assertFalse($battle3->isOpen());
+
+        // test scopeOpen()
+        $cnt = OpenBattle::open()->count();
+        $this->assertEquals(2, $cnt);
+        // TODO: check if $battle11 and $battle21 are in $cnt
     }
 }

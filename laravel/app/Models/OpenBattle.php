@@ -49,6 +49,19 @@ class OpenBattle extends Model
         } else return false;
     }
 
+    public function scopeOpen($query){
+        $start = Carbon::parse($this->phase_start);
+        $startMinPhase1 = Carbon::now()->subHours(config('rap-battle.phase1time', 24));
+        $startMinPhase2 = Carbon::now()->subHours(config('rap-battle.phase2time', 24));
+
+        $ids1 = $query->where('phase', 1)->where('phase_start', '>=',
+                $startMinPhase1->toDateTimeString())->lists('id')->toArray();
+        $ids2 = $query->where('phase', 2)->where('phase_start', '>=',
+                $startMinPhase2->toDateTimeString())->lists('id')->toArray();
+
+        return OpenBattle::whereIn('id', array_merge($ids1, $ids2));
+    }
+
     /**
      * Get user rapper 1
      */
