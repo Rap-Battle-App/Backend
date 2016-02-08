@@ -118,8 +118,8 @@ class User extends Model implements AuthenticatableContract,
     public function hasBattleRequestAgainst(User $user)
     {
         // possibly naive solution, other one had really ugly bugs
-        $cnt1 = BattleRequest::where('challenger_id', $this->id)->where('challenged_id', $user->id)->count();
-        $cnt2 = BattleRequest::where('challenged_id', $this->id)->where('challenger_id', $user->id)->count();
+        $cnt1 = BattleRequest::where('challenger_id', $this->id)->where('challenged_id', $user->id)->open()->count();
+        $cnt2 = BattleRequest::where('challenged_id', $this->id)->where('challenger_id', $user->id)->open()->count();
         return $cnt1 > 0 || $cnt2 > 0;
     }
 
@@ -129,8 +129,8 @@ class User extends Model implements AuthenticatableContract,
     public function scopeNoBattleRequestsAgainst($query, User $user)
     {
         // get opponents of $user
-        $challenger = $user->battleRequests()->lists('challenger_id')->toArray();
-        $challenged = $user->battleRequests()->lists('challenged_id')->toArray();
+        $challenger = $user->battleRequests()->open()->lists('challenger_id')->toArray();
+        $challenged = $user->battleRequests()->open()->lists('challenged_id')->toArray();
         $array = array_merge($challenger, $challenged);
         return $query->whereNotIn('id', $array);
     }
