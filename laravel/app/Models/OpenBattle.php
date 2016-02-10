@@ -28,8 +28,8 @@ class OpenBattle extends Model
      */
     public function setPhaseAttribute($phase)
     {
-        $this->phase = $phase;
-        $this->phase_start = Carbon::now()->toDateTimeString();
+        $this->attributes['phase'] = $phase;
+        $this->attributes['phase_start'] = Carbon::now()->toDateTimeString();
 
         //TODO start phase timer
     }
