@@ -63,6 +63,6 @@ class UpdateOpenBattle
             \Event::fire(new VideoWasUploaded($outfile, $infiles, false,
                     new OpenBattleCompleted($event->battle, $this->outfilename)));
         }
+        $event->battle->save();
     }
-    $event->battle->save();
 }

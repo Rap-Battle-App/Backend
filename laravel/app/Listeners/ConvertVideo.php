@@ -108,6 +108,8 @@ class ConvertVideo implements ShouldQueue
                                                         'outfiles' => $event->outfile]);
 
                 $videos[0]->save($format, $event->outfile);
+                Log::info('Video conversion successful', ['infiles' => $event->infiles,
+                                                        'outfiles' => $event->outfile]);
             } catch(Exception $e){
                 // TODO: handle exception: video could not be converted / concatenated
                 Log::error('Video conversion failed', ['exception' => $e->getMessage(),
