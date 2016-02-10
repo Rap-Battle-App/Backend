@@ -59,6 +59,7 @@ class BattleRequestController extends Controller
         $opponent = User::findOrFail($request->input('user_id'));
 
         $user = $request->user();
+        if(is_null($user)) return response('Unauthorized', 401);
 
         if (!$opponent->rapper) {
             return response()->json(['user_id' => [trans('rap-battle.no-rapper')]], 422);

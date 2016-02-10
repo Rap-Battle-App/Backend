@@ -118,8 +118,8 @@ class User extends Model implements AuthenticatableContract,
     public function hasBattleRequestAgainst(User $user)
     {
         // possibly naive solution, other one had really ugly bugs
-        $cnt1 = BattleRequest::where('challenger_id', $this->id)->where('challenged_id', $user->id)->open()->count();
-        $cnt2 = BattleRequest::where('challenged_id', $this->id)->where('challenger_id', $user->id)->open()->count();
+        $cnt1 = BattleRequest::where('challenger_id', $this->id)->where('challenged_id', $user->id)->count();
+        $cnt2 = BattleRequest::where('challenged_id', $this->id)->where('challenger_id', $user->id)->count();
         return $cnt1 > 0 || $cnt2 > 0;
     }
 
@@ -129,8 +129,8 @@ class User extends Model implements AuthenticatableContract,
     public function scopeNoBattleRequestsAgainst($query, User $user)
     {
         // get opponents of $user
-        $challenger = $user->battleRequests()->open()->lists('challenger_id')->toArray();
-        $challenged = $user->battleRequests()->open()->lists('challenged_id')->toArray();
+        $challenger = $user->battleRequests()->lists('challenger_id')->toArray();
+        $challenged = $user->battleRequests()->lists('challenged_id')->toArray();
         $array = array_merge($challenger, $challenged);
         return $query->whereNotIn('id', $array);
     }
@@ -169,8 +169,8 @@ class User extends Model implements AuthenticatableContract,
         //$cnt = $this->openBattles()->where('rapper1_id', $user->id)->orWhere('rapper2_id', $user->id)->count();
         //return $cnt > 0;
         // possibly naive solution, other one had really ugly bugs
-        $cnt1 = OpenBattle::where('rapper1_id', $this->id)->where('rapper2_id', $user->id)->count();
-        $cnt2 = OpenBattle::where('rapper2_id', $this->id)->where('rapper1_id', $user->id)->count();
+        $cnt1 = OpenBattle::where('rapper1_id', $this->id)->where('rapper2_id', $user->id)->open()->count();
+        $cnt2 = OpenBattle::where('rapper2_id', $this->id)->where('rapper1_id', $user->id)->open()->count();
         return $cnt1 > 0 || $cnt2 > 0;
     }
 
@@ -180,8 +180,8 @@ class User extends Model implements AuthenticatableContract,
     public function scopeNoOpenBattleAgainst($query, User $user)
     {
         // get opponents of $user
-        $rapper1 = $user->openBattles()->lists('rapper1_id')->toArray();
-        $rapper2 = $user->openBattles()->lists('rapper2_id')->toArray();
+        $rapper1 = $user->openBattles()->open()->lists('rapper1_id')->toArray();
+        $rapper2 = $user->openBattles()->open()->lists('rapper2_id')->toArray();
 
         return $query->whereNotIn('id', array_merge($rapper1, $rapper2));
     }
