@@ -88,7 +88,7 @@ class ModelOpenBattleTest extends TestCase
     }
 
     /**
-     * Test for isOpen() and scopeOpen()
+     * Test for isOpen(), scopeOpen() and setPhaseAttribute()
      */
     public function testIsOpen(){
         $battle11 = factory(App\Models\OpenBattle::class)->create();
@@ -112,6 +112,13 @@ class ModelOpenBattleTest extends TestCase
         Carbon::setTestNow(Carbon::now()->subHours(config('rap-battle.phase2time', 24) + 1));
         $battle22->setPhaseAttribute(2);
         $battle22->save();
+
+        // test phase
+        $this->assertEquals(1, $battle11->phase);
+        $this->assertEquals(1, $battle12->phase);
+        $this->assertEquals(2, $battle21->phase);
+        $this->assertEquals(2, $battle22->phase);
+
 
         Carbon::setTestNow($now);
         $this->assertTrue($battle11->isOpen());

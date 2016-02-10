@@ -141,8 +141,8 @@ class OpenBattle extends Model
     public function hasFirstRounds()
     {
         return !empty($this->rapper1_round1)
-            && !empty($this->rapper2_round1)
-            /*&& $this->phase >= 1*/;
+            && !empty($this->rapper2_round1);
+            /*&& $this->phase >= 1;*/
     }
 
     /**
