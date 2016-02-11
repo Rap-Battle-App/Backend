@@ -54,9 +54,11 @@ class OpenBattle extends Model
         $startMinPhase1 = Carbon::now()->subHours(config('rap-battle.phase1time', 24));
         $startMinPhase2 = Carbon::now()->subHours(config('rap-battle.phase2time', 24));
 
-        $ids1 = $query->where('phase', 1)->where('phase_start', '>=',
+        $query1 = $query;
+        $query2 = clone $query;
+        $ids1 = $query1->where('phase', 1)->where('phase_start', '>=',
                 $startMinPhase1->toDateTimeString())->lists('id')->toArray();
-        $ids2 = $query->where('phase', 2)->where('phase_start', '>=',
+        $ids2 = $query2->where('phase', 2)->where('phase_start', '>=',
                 $startMinPhase2->toDateTimeString())->lists('id')->toArray();
 
         return OpenBattle::whereIn('id', array_merge($ids1, $ids2));
