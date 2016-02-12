@@ -99,4 +99,12 @@ class Battle extends Model
         return $query->where('created_at', '<', $timeoldest->toDateTimeString());
     }
 
+    /**
+     * Gets the URL to a video file
+     */
+    public function getVideoURL()                                                                                    
+    {
+        return is_null($this->attributes['video']) ? null : route('data.video', ['file' => $this->attributes['video']]);
+    }
+
 }

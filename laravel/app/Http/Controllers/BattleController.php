@@ -45,7 +45,7 @@ class BattleController extends Controller
 
         $battleInfo = array(
             'id' => $battle->id,
-            'video_url' => $battle->video,
+            'video_url' => $battle->getVideoURL(),
             'rapper1' => $profilePreview1,
             'rapper2' => $profilePreview2,
             'voting' => $voting,
