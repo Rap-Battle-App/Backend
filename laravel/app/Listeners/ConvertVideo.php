@@ -66,6 +66,9 @@ class ConvertVideo implements ShouldQueue
                 $videos[] = $ffmpeg->open($file);
             }
 
+            $width = config('rap-battle.video_width', 1920);
+            $height = config('rap-battle.video_height', 1080);
+
             /**
              * The concatenation filter needs all videos to be the same size
              * therefore the resize filter will be added if only a single video
@@ -73,10 +76,13 @@ class ConvertVideo implements ShouldQueue
              */
             if(count($videos) == 1){ // only one input file
                 // add resize filter
-                $width = config('rap-battle.video_width', 1920);
-                $height = config('rap-battle.video_height', 1080);
-                $resizefilter = new ResizeFilter(new Dimension($width, $height), ResizeFilter::RESIZEMODE_INSET);
+                // $resizefilter = new ResizeFilter(new Dimension($width, $height), ResizeFilter::RESIZEMODE_INSET);
+                $resizefilter = new ResizeFilter(new Dimension($width, $height), ResizeFilter::RESIZEMODE_FIT);
                 $videos[0]->addFilter($resizefilter);
+
+                // apply setsar filter to correct pixel aspect ratio
+                $setdar = new SimpleFilter(array('-vf', 'setdar=' . $height . '/' . $width));
+                $videos[0]->addFilter($setdar);
             } else { // multiple input files: create concatenation filter
                 // create concat filter
                 $concatfilter = new ConcatFilter;
@@ -93,14 +99,15 @@ class ConvertVideo implements ShouldQueue
             $videos[0]->addFilter($movflags);
 
             // set video format
-            $format = new FFMpeg\Format\Video\X264('libmp3lame');
+            $format = new FFMpeg\Format\Video\X264(/*'libmp3lame'*/);
 
             $videobitrate = config('rap-battle.video_bitrate', $format->getKiloBitrate());
             $format->setKiloBitrate($videobitrate);
             $audiobitrate = config('rap-battle.audio_bitrate', $format->getAudioKiloBitrate());
             $format->setAudioKiloBitrate($audiobitrate);
-            $audiocodec = config('rap-battle.audio_codec', $format->getAudioCodec());
-            $format->setAudioCodec($audiocodec);
+            //$audiocodec = config('rap-battle.audio_codec', $format->getAudioCodec());
+            //$format->setAudioCodec($audiocodec);
+            $format->setAudioCodec(null);
 
             // convert / concatenate video
             try {
