@@ -24,13 +24,13 @@ class BattleController extends Controller
         $profilePreview1 = array(
             'user_id' => $battle->rapper1_id,
             'username' => User::findOrFail($battle->rapper1_id)->username,
-            'profile_picture' => User::findOrFail($battle->rapper1_id)->picture,
+            'profile_picture' => User::findOrFail($battle->rapper1_id)->getProfilePicture(),
     	);
 
         $profilePreview2 = array(
             'user_id' => $battle->rapper2_id,
             'username' => User::findOrFail($battle->rapper2_id)->username,
-            'profile_picture' => User::findOrFail($battle->rapper2_id)->picture,
+            'profile_picture' => User::findOrFail($battle->rapper2_id)->getProfilePicture(),
 	    );
 
         $userVote = $user->votes()->where('battle_id', $battle->id)->get()->first();
@@ -68,7 +68,7 @@ class BattleController extends Controller
     //return an Array of Battles with the most votes
     public function getTrending(Request $request)
     {
-        $trending = Battle::trending()->get();
+        $trending = Battle::completed()->trending()->get();
         $data = $this->createBattleOverview($trending);
 
         $amount = $request->input('amount', 15);
