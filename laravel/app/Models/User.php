@@ -283,7 +283,7 @@ class User extends Model implements AuthenticatableContract,
         return [
             'user_id' => $this->id,
             'username' => $this->username,
-            'profile_picture' => $this->getProfilePictureAttribute()
+            'profile_picture' => $this->getProfilePicture()
         ];
     }
 
@@ -297,7 +297,7 @@ class User extends Model implements AuthenticatableContract,
         return [
             'id' => $this->id,
             'username' => $this->username,
-            'profile_picture' => $this->getProfilePictureAttribute(),
+            'profile_picture' => $this->getProfilePicture(),
             'city' => $this->city,
             'about_me' => $this->about_me,
             'statistics' => ['wins' => $this->wins, 'defeats' => $this->defeats],
@@ -316,5 +316,15 @@ class User extends Model implements AuthenticatableContract,
             'rapper' => $this->rapper,
             'notifications' => $this->notifications
         ];
+    }
+
+    /**
+     * Get route to the users profile picture.
+     *
+     * @return null|string
+     */
+    public function getProfilePicture()
+    {
+        return is_null($this->attributes['picture']) ? null : route('data.picture', ['file' => $this->attributes['picture']]);
     }
 }
